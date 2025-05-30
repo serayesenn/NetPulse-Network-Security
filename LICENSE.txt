@@ -1,0 +1,22 @@
+NetPulse Özel Lisansı v1.0  
+Copyright (c) 2025 Seray ESEN
+
+Bu yazılım ve kaynak kodları, Seray ESEN tarafından geliştirilmiş olup tüm hakları kendisine aittir.
+
+İzinler:
+- Yazılım, yalnızca kişisel, eğitimsel ve akademik araştırma amaçlı kullanılabilir.
+- Yazılımın tamamı veya bir kısmı kullanıldığında, **açık ve görünür bir şekilde "Seray ESEN" ismiyle atıfta bulunulmalı** ve bu lisans metni yazılıma eşlik etmelidir.
+- Topluluk katkıları memnuniyetle kabul edilir ve aynı lisans koşulları altında değerlendirilir.
+
+Kısıtlamalar:
+- Yazılım, hiçbir koşulda ticari amaçla kullanılamaz, satılamaz veya ticari bir ürünün parçası olarak dağıtılamaz.
+- Yazılım, yalnızca kullanıcıya ait sistemler üzerinde veya izinli ağlarda kullanılabilir. İzinsiz sistemlerde veya ağlarda kullanımı kesinlikle yasaktır.
+- Seray ESEN’in yazılı izni olmadan yazılımın yeniden lisanslanması veya başka lisanslar altında dağıtılması yasaktır.
+
+Yasal Uyarı:
+Bu yazılım “olduğu gibi” sunulmaktadır. Seray ESEN, yazılımın doğruluğu, güvenliği, performansı veya belirli bir amaca uygunluğu konusunda hiçbir garanti vermez. Yazılımın kullanımından doğabilecek herhangi bir doğrudan veya dolaylı zarardan sorumlu tutulamaz.
+
+İletişim:  
+📧 serayesen2003@gmail.com  
+🌐 https://github.com/serayesenn
+🌐 https://www.linkedin.com/in/serayesen/
