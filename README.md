@@ -7,7 +7,7 @@ Bu modüllerin yanı sıra ağ topolojisini çizme, anlık ağ trafiğini izleye
 NOT: Bu yazılım, sürekli geliştirilmekte olan açık kaynak bir projedir ve "olduğu gibi" sunulmaktadır. Geri bildirimler ve katkılar her zaman memnuniyetle karşılanır. 
 Bu projeyi daha iyi hale getirmek için topluluğun katkılarına açığım. Hata bildirimleri, öneriler veya geliştirme talepleriniz için lütfen benimle iletişime geçmekten çekinmeyin. Geri bildirimleriniz ve katkılarınız projeyi daha güvenli ve işlevsel hale getirmemize yardımcı olacaktır.
 
-Bu proje, [NetPulse Özel Lisansı](LICENSE.txt) kapsamında lisanslanmıştır.
+!!! Bu proje, [NetPulse Özel Lisansı](LICENSE.txt) kapsamında lisanslanmıştır.
 - Kişisel ve eğitimsel kullanım serbesttir.  
 - Ticari kullanım kesinlikle yasaktır.  
 - Detaylı bilgi için [LICENSE.txt](LICENSE.txt) dosyasını inceleyiniz.
