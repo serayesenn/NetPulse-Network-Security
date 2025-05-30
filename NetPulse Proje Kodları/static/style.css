@@ -1,0 +1,271 @@
+/* Genel Sıfırlama ve Temel Stiller */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #0A0F1F;
+    color: #B0B8D1;
+    padding: 20px;
+    line-height: 1.4;
+}
+
+/* Başlık Stilleri */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    background: linear-gradient(90deg, #5B6EFF 0%, #A78BFA 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+/* Kapsayıcı ve Grid Düzeni */
+.container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.left-column, .small-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Bölüm Stilleri */
+.section {
+    background-color: #1A2338;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(91, 110, 255, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+.section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(91, 110, 255, 0.2);
+}
+
+.scan-section {
+    text-align: center;
+}
+
+.scan-section:hover {
+    transform: none;
+    box-shadow: 0 2px 10px rgba(91, 110, 255, 0.1);
+}
+
+/* Başlık ve Alt Çizgi */
+h2 {
+    margin: 0 0 15px;
+    font-size: 1.8em;
+    color: #5B6EFF;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    position: relative;
+    display: inline-block;
+}
+
+h2.no-line::after {
+    display: none;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 50%;
+    height: 3px;
+    background-color: #5B6EFF;
+    border-radius: 2px;
+}
+
+h3 {
+    font-size: 1.4em;
+    color: #A78BFA;
+    font-weight: 600;
+    margin: 15px 0 10px;
+    position: relative;
+}
+
+h3::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    width: 5px;
+    height: 50%;
+    background: #5B6EFF;
+    transform: translateY(-50%);
+    border-radius: 2px;
+}
+
+/* Buton Stilleri */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.button {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #5B6EFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.button:hover {
+    background-color: #4A5AE6;
+    transform: scale(1.05);
+}
+
+.button:disabled {
+    background-color: #2E344F;
+    cursor: not-allowed;
+}
+
+.small-button {
+    padding: 8px 16px;
+    font-size: 0.9em;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+/* Yükleme Mesajı ve Hareket Eden Noktalar */
+.loading-message {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    margin-top: 15px;
+    font-size: 1em;
+    color: #5B6EFF;
+}
+
+.loading-message span {
+    background: linear-gradient(90deg, #5B6EFF 0%, #A78BFA 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 600;
+}
+
+.dots {
+    display: inline-flex;
+}
+
+.dot {
+    font-size: 1.2em;
+    animation: dot-blink 1.4s infinite;
+}
+
+.dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes dot-blink {
+    0%, 20% {
+        opacity: 1;
+    }
+    40%, 100% {
+        opacity: 0.3;
+    }
+}
+
+/* Sonuç Bölümü */
+.result-section {
+    background-color: #141B2D;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    text-align: left;
+    position: relative;
+}
+
+.result-section p {
+    font-size: 0.9em;
+    color: #A78BFA;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* Placeholder */
+.placeholder {
+    margin-top: 15px;
+    height: 120px;
+    background-color: #141B2D;
+    text-align: center;
+    padding: 40px;
+    border-radius: 6px;
+    color: #6c757d;
+}
+
+/* Tarama Metni */
+.scan-text {
+    background: linear-gradient(90deg, #5B6EFF 0%, #A78BFA 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+/* Vurgu Stili */
+.highlight {
+    background: linear-gradient(90deg, #5B6EFF 0%, #A78BFA 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 600;
+}
+
+/* Aktif Kullanıcılar için Ek Stil */
+#active-users {
+    font-size: 1.2em;
+}
+
+/* Ağ Hızı Grafiği için Ek Stil */
+#speed-chart {
+    max-height: 150px;
+    display: none; /* Ölçüm yapılmadan önce gizli */
+}

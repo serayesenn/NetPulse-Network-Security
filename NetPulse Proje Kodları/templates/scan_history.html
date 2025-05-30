@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetPulse - Tarama Geçmişi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: rgba(26, 35, 56, 0.8);
+            margin-bottom: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navbar-user {
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-user .user-icon {
+            color: #5B6EFF;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .navbar-user .user-name {
+            color: #B0B8D1;
+            font-weight: 600;
+        }
+        
+        .navbar-actions a {
+            color: #B0B8D1;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background-color: #242e48;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .navbar-actions a:hover {
+            background-color: #FF6B6B;
+            color: white;
+        }
+        
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background-color: #1a1a2e;
+            color: #B0B8D1;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .sidebar.collapsed {
+            width: 60px;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #fff;
+        }
+        
+        .sidebar.collapsed .sidebar-header h1 {
+            display: none;
+        }
+        
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #B0B8D1;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        .sidebar-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #B0B8D1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #242e48;
+            color: #fff;
+        }
+        
+        .sidebar-item.active {
+            background-color: #5B6EFF;
+            color: #fff;
+        }
+        
+        .sidebar-item i {
+            font-size: 18px;
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar.collapsed .sidebar-item span {
+            display: none;
+        }
+        
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .user-info i {
+            margin-right: 10px;
+            color: #5B6EFF;
+        }
+        
+        .sidebar.collapsed .user-info span {
+            display: none;
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            color: #B0B8D1;
+            text-decoration: none;
+            padding: 8px 0;
+        }
+        
+        .logout-btn:hover {
+            color: #FF6B6B;
+        }
+        
+        .logout-btn i {
+            margin-right: 10px;
+        }
+        
+        .sidebar.collapsed .logout-btn span {
+            display: none;
+        }
+        
+      
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #0f172a;
+        }
+        
+        .main-content.expanded {
+            margin-left: 60px;
+        }
+        
+        .main-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .main-header h1 {
+            margin: 0 auto;
+            color: #fff;
+        }
+        
+        .user-info-mobile {
+            display: none;
+            align-items: center;
+        }
+        
+        .user-info-mobile span {
+            margin-right: 10px;
+            color: #B0B8D1;
+        }
+        
+        .user-info-mobile a {
+            color: #B0B8D1;
+            text-decoration: none;
+        }
+        
+        .user-info-mobile a:hover {
+            color: #FF6B6B;
+        }
+        
+      
+        .page-content {
+            flex: 1;
+            background: #0f172a;
+        }
+     
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+            color: #B0B8D1;
+            font-size: 14px;
+        }
+        
+       
+        .button {
+            cursor: pointer;
+            background-color: #5B6EFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .button:hover {
+            background-color: #4A5CD0;
+            transform: translateY(-2px);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+       
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            background-color: #1E1E2E;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .filter-label {
+            color: #B0B8D1;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .filter-select {
+            background-color: #242e48;
+            color: #B0B8D1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-family: 'Montserrat', sans-serif;
+            min-width: 150px;
+            cursor: pointer;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #5B6EFF;
+        }
+        
+        .scan-history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #1E1E2E;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .scan-history-table th, .scan-history-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #B0B8D1;
+        }
+        
+        .scan-history-table th {
+            background-color: #242e48;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .scan-history-table tr:hover {
+            background-color: rgba(91, 110, 255, 0.1);
+        }
+        
+        .scan-history-table .scan-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .scan-history-table .scan-type-ip {
+            background-color: rgba(91, 110, 255, 0.2);
+            color: #5B6EFF;
+        }
+        
+        .scan-history-table .scan-type-mac {
+            background-color: rgba(52, 199, 89, 0.2);
+            color: #34C759;
+        }
+        
+        .scan-history-table .scan-type-os {
+            background-color: rgba(255, 149, 0, 0.2);
+            color: #FF9500;
+        }
+        
+        .scan-history-table .scan-type-services {
+            background-color: rgba(255, 59, 48, 0.2);
+            color: #FF3B30;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-button {
+            background: none;
+            border: none;
+            color: #B0B8D1;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .action-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .action-button.view {
+            color: #5B6EFF;
+        }
+        
+        .action-button.delete {
+            color: #FF3B30;
+        }
+        
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+        
+        .select-all-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .select-all-container input {
+            margin-right: 10px;
+        }
+        
+        .delete-selected {
+            margin-left: auto;
+            background-color: #FF3B30;
+        }
+        
+        .delete-selected:hover {
+            background-color: #E02E24;
+        }
+        
+        .delete-selected:disabled {
+            background-color: #6B3330;
+            cursor: not-allowed;
+        }
+        
+        .no-records {
+            text-align: center;
+            padding: 30px;
+            color: #B0B8D1;
+            background-color: #1E1E2E;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .scan-detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background-color: #1a1a2e;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: #B0B8D1;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: #FF6B6B;
+        }
+        
+        .modal-body {
+            max-height: calc(80vh - 100px);
+            overflow-y: auto;
+        }
+        
+        
+        .loading-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            color: #B0B8D1;
+            background-color: #1E1E2E;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .dots {
+            display: inline-flex;
+        }
+        
+        .dot {
+            animation: dot-animation 1.4s infinite;
+            opacity: 0;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes dot-animation {
+            0% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        
+        
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .main-header {
+                display: flex;
+            }
+            
+            .user-info-mobile {
+                display: flex;
+            }
+            
+            .filter-container {
+                flex-direction: column;
+            }
+            
+            .action-column {
+                width: 80px;
+            }
+        }
+        
+        .action-button.pdf {
+            color: #d32f2f;
+            background: linear-gradient(90deg, #ffd6d6 0%, #fff 100%);
+            border: 1px solid #d32f2f22;
+            box-shadow: 0 2px 8px rgba(211,47,47,0.08);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .action-button.pdf:hover {
+            background: linear-gradient(90deg, #d32f2f 0%, #ff5252 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(211,47,47,0.18);
+        }
+        .action-button.pdf:active {
+            background: #b71c1c;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>NetPulse</h1>
+            <button id="sidebar-toggle" class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="sidebar-menu">
+            <a href="{{ url_for('index') }}" class="sidebar-item">
+                <i class="fas fa-home"></i>
+                <span>Ana Sayfa</span>
+            </a>
+            <a href="{{ url_for('index') }}#topology" class="sidebar-item">
+                <i class="fas fa-project-diagram"></i>
+                <span>Ağ Topolojisi</span>
+            </a>
+            <a href="{{ url_for('index') }}#speed" class="sidebar-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Ağ Hızı</span>
+            </a>
+            <a href="{{ url_for('index') }}#traffic" class="sidebar-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Ağ Trafiği İzleme</span>
+            </a>
+            <a href="{{ url_for('scan_history_page') }}" class="sidebar-item active">
+                <i class="fas fa-history"></i>
+                <span>Tarama Geçmişi</span>
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>{{ session.get('fullname', 'Kullanıcı') }}</span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Çıkış Yap</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <div class="main-header">
+            <button id="mobile-sidebar-toggle" class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>NetPulse</h1>
+            <div class="user-info-mobile">
+                <span>{{ session.get('fullname', 'Kullanıcı') }}</span>
+                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <h2>Tarama Geçmişi</h2>
+            
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label class="filter-label">İşlev Türü</label>
+                    <select id="scan-type-filter" class="filter-select">
+                        <option value="all">Tümü</option>
+                        <option value="ip">IP Taraması</option>
+                        <option value="mac">MAC Taraması</option>
+                        <option value="os">İşletim Sistemi Taraması</option>
+                        <option value="services">Servis Taraması</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Tarih</label>
+                    <select id="time-filter" class="filter-select">
+                        <option value="all">Tümü</option>
+                        <option value="day">Son 1 Gün</option>
+                        <option value="week">Son 1 Hafta</option>
+                        <option value="month">Son 1 Ay</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" style="justify-content: flex-end;">
+                    <button id="apply-filters" class="button">Filtrele</button>
+                    <button id="debug-database" class="button" style="background-color: #ff9800;">Sistemi Kontrol Et</button>
+                </div>
+            </div>
+            
+            <div class="select-all-container">
+                <label>
+                    <input type="checkbox" id="select-all"> Tümünü Seç
+                </label>
+                <button id="delete-selected" class="button delete-selected" disabled>Seçilenleri Sil</button>
+            </div>
+            
+            <div id="history-container">
+                <div class="loading-message" id="loading-message">
+                    <span>Yükleniyor</span>
+                    <span class="dots">
+                        <span class="dot">.</span>
+                        <span class="dot">.</span>
+                        <span class="dot">.</span>
+                    </span>
+                </div>
+                
+                <table class="scan-history-table" id="scan-history-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell">#</th>
+                            <th>ID</th>
+                            <th>Tarama Türü</th>
+                            <th>Tarih</th>
+                            <th class="action-column">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                      
+                    </tbody>
+                </table>
+                
+                <div id="no-records" class="no-records" style="display: none;">
+                    <p>Henüz tarama kaydı bulunmamaktadır.</p>
+                    <p>Ana sayfaya gidip tarama yaptıktan sonra burada görüntüleyebilirsiniz.</p>
+                    <p><a href="{{ url_for('index') }}" class="button">Ana Sayfa'ya Git</a></p>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div id="scan-detail-modal" class="scan-detail-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Tarama Detayı</h3>
+                    <button class="close-modal" id="close-modal">&times;</button>
+                </div>
+                <div class="modal-body" id="scan-detail-content">
+                  
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2024 NetPulse - Tüm hakları saklıdır.</p>
+        </div>
+    </div>
+    
+    <script>
+       
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                });
+            }
+            
+            if (mobileSidebarToggle) {
+                mobileSidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+          
+            loadScanHistory();
+            
+            
+            document.getElementById('apply-filters').addEventListener('click', loadScanHistory);
+            
+           
+            document.getElementById('debug-database').addEventListener('click', debugDatabase);
+            
+           
+            document.getElementById('select-all').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.scan-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateDeleteButtonState();
+            });
+            
+           
+            document.getElementById('delete-selected').addEventListener('click', deleteSelectedScans);
+            
+           
+            document.getElementById('close-modal').addEventListener('click', function() {
+                document.getElementById('scan-detail-modal').style.display = 'none';
+            });
+            
+            
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('scan-detail-modal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+        
+       
+        function loadScanHistory() {
+            console.log("Tarama geçmişi yükleniyor...");
+            const scanTypeFilter = document.getElementById('scan-type-filter').value;
+            const timeFilter = document.getElementById('time-filter').value;
+            
+            document.getElementById('loading-message').style.display = 'flex';
+            document.getElementById('scan-history-table').style.display = 'none';
+            document.getElementById('no-records').style.display = 'none';
+            
+            
+            fetch(`/api/scan_history?type=${scanTypeFilter}&time=${timeFilter}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Tarama geçmişi verileri:', data); 
+                    document.getElementById('loading-message').style.display = 'none';
+                    
+                    if (data.history && data.history.length > 0) {
+                        renderHistoryTable(data.history);
+                        document.getElementById('scan-history-table').style.display = 'table';
+                    } else {
+                        document.getElementById('no-records').style.display = 'block';
+                        
+                        
+                        const noRecordsElement = document.getElementById('no-records');
+                        noRecordsElement.innerHTML = `
+                            <p>Henüz tarama kaydı bulunmamaktadır.</p>
+                            <p>Ana sayfaya gidip tarama yaptıktan sonra burada görüntüleyebilirsiniz.</p>
+                            <p><a href="{{ url_for('index') }}" class="button">Ana Sayfa'ya Git</a></p>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Tarama geçmişi yükleme hatası:', error);
+                    document.getElementById('loading-message').style.display = 'none';
+                    document.getElementById('no-records').style.display = 'block';
+                    
+                   
+                    const noRecordsElement = document.getElementById('no-records');
+                    noRecordsElement.innerHTML = `
+                        <p>Tarama geçmişi yüklenirken bir hata oluştu!</p>
+                        <p>Hata detayı: ${error.message}</p>
+                        <p>Tekrar denemek için sayfayı yenileyin veya Ana Sayfa'ya dönün.</p>
+                        <p><a href="{{ url_for('index') }}" class="button">Ana Sayfa'ya Git</a></p>
+                    `;
+                });
+        }
+        
+        
+        function renderHistoryTable(history) {
+            const tableBody = document.getElementById('history-table-body');
+            tableBody.innerHTML = '';
+            
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                
+                
+                const checkboxCell = document.createElement('td');
+                checkboxCell.className = 'checkbox-cell';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'scan-checkbox';
+                checkbox.dataset.id = item.id;
+                checkbox.addEventListener('change', updateDeleteButtonState);
+                checkboxCell.appendChild(checkbox);
+                
+               
+                const idCell = document.createElement('td');
+                idCell.textContent = item.id;
+                
+                
+                const typeCell = document.createElement('td');
+                const typeSpan = document.createElement('span');
+                typeSpan.className = `scan-type scan-type-${item.scan_type}`;
+                
+                let scanTypeName = '';
+                switch(item.scan_type) {
+                    case 'ip': scanTypeName = 'IP Taraması'; break;
+                    case 'mac': scanTypeName = 'MAC Taraması'; break;
+                    case 'os': scanTypeName = 'İşletim Sistemi Taraması'; break;
+                    case 'services': scanTypeName = 'Servis Taraması'; break;
+                    default: scanTypeName = item.scan_type; break;
+                }
+                
+                typeSpan.textContent = scanTypeName;
+                typeCell.appendChild(typeSpan);
+                
+               
+                const dateCell = document.createElement('td');
+                dateCell.textContent = item.created_at;
+               
+                const actionCell = document.createElement('td');
+                actionCell.className = 'action-column';
+                
+                const actionButtons = document.createElement('div');
+                actionButtons.className = 'action-buttons';
+                
+                const viewButton = document.createElement('button');
+                viewButton.className = 'action-button view';
+                viewButton.innerHTML = '<i class="fas fa-eye"></i>';
+                viewButton.title = 'Görüntüle';
+                viewButton.addEventListener('click', () => viewScanDetail(item.id));
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'action-button delete';
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.title = 'Sil';
+                deleteButton.addEventListener('click', () => deleteScan(item.id));
+                
+                const pdfButton = document.createElement('button');
+                pdfButton.className = 'action-button pdf';
+                pdfButton.innerHTML = '<i class="fas fa-file-pdf"></i>';
+                pdfButton.title = 'PDF İndir';
+                pdfButton.addEventListener('click', () => downloadPDF(item.id));
+                
+                actionButtons.appendChild(viewButton);
+                actionButtons.appendChild(deleteButton);
+                actionButtons.appendChild(pdfButton);
+                actionCell.appendChild(actionButtons);
+                
+                row.appendChild(checkboxCell);
+                row.appendChild(idCell);
+                row.appendChild(typeCell);
+                row.appendChild(dateCell);
+                row.appendChild(actionCell);
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        
+        function viewScanDetail(scanId) {
+            const modal = document.getElementById('scan-detail-modal');
+            const modalContent = document.getElementById('scan-detail-content');
+            
+            modalContent.innerHTML = '<p>Yükleniyor...</p>';
+            modal.style.display = 'flex';
+            
+            fetch(`/api/scan_history/${scanId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.scan) {
+                        let scanDetailHtml = `
+                            <div class="scan-detail-header">
+                                <p><strong>ID:</strong> ${data.scan.id}</p>
+                                <p><strong>Tarama Türü:</strong> ${getScanTypeName(data.scan.scan_type)}</p>
+                                <p><strong>Tarih:</strong> ${data.scan.created_at}</p>
+                            </div>
+                            <div class="scan-detail-content">
+                                <h4>Tarama Sonuçları</h4>
+                        `;
+                        
+                       
+                        if (data.scan.scan_result) {
+                            const result = data.scan.scan_result;
+                            
+                            if (data.scan.scan_type === 'ip' && result.ip_addresses) {
+                                scanDetailHtml += `<p><strong>Bulunan Cihaz Sayısı:</strong> ${result.device_count}</p>`;
+                                scanDetailHtml += `<p><strong>IP Adresleri:</strong></p><ul>`;
+                                result.ip_addresses.forEach(ip => {
+                                    scanDetailHtml += `<li>${ip}</li>`;
+                                });
+                                scanDetailHtml += `</ul>`;
+                            }
+                            else if (data.scan.scan_type === 'mac' && result.mac_addresses) {
+                                scanDetailHtml += `<p><strong>Bulunan Cihaz Sayısı:</strong> ${result.device_count}</p>`;
+                                scanDetailHtml += `<p><strong>MAC Adresleri:</strong></p><ul>`;
+                                result.mac_addresses.forEach(mac => {
+                                    scanDetailHtml += `<li>${mac}</li>`;
+                                });
+                                scanDetailHtml += `</ul>`;
+                            }
+                            else if (data.scan.scan_type === 'os' && result.os_details) {
+                                scanDetailHtml += `<p><strong>Bulunan Cihaz Sayısı:</strong> ${result.device_count}</p>`;
+                                scanDetailHtml += `<p><strong>İşletim Sistemleri:</strong></p><ul>`;
+                                for (const [host, os] of Object.entries(result.os_details)) {
+                                    scanDetailHtml += `<li>${host}: ${os}</li>`;
+                                }
+                                scanDetailHtml += `</ul>`;
+                            }
+                            else if (data.scan.scan_type === 'services' && result.services) {
+                                scanDetailHtml += `<p><strong>Bulunan Cihaz Sayısı:</strong> ${result.device_count}</p>`;
+                                scanDetailHtml += `<p><strong>Servisler ve Açık Portlar:</strong></p>`;
+                                
+                                for (const [host, services] of Object.entries(result.services)) {
+                                    scanDetailHtml += `<p>${host}:</p><ul>`;
+                                    
+                                    if (typeof services === 'object' && !services.error) {
+                                        for (const [port, info] of Object.entries(services)) {
+                                            scanDetailHtml += `<li>Port ${port}: ${info.details}</li>`;
+                                        }
+                                    } else if (services.error) {
+                                        scanDetailHtml += `<li>Hata: ${services.error}</li>`;
+                                    } else {
+                                        scanDetailHtml += `<li>Veri bulunamadı</li>`;
+                                    }
+                                    
+                                    scanDetailHtml += `</ul>`;
+                                }
+                            }
+                            else {
+                                
+                                scanDetailHtml += `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                            }
+                        } else {
+                            scanDetailHtml += `<p>Tarama sonucu bulunamadı.</p>`;
+                        }
+                        
+                        scanDetailHtml += `</div>`;
+                        modalContent.innerHTML = scanDetailHtml;
+                    } else {
+                        modalContent.innerHTML = '<p>Tarama bulunamadı!</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    modalContent.innerHTML = '<p>Tarama detayı yüklenirken bir hata oluştu!</p>';
+                });
+        }
+        
+       
+        function deleteScan(scanId) {
+            if (confirm('Bu tarama kaydını silmek istediğinize emin misiniz?')) {
+                deleteScanRecords([scanId]);
+            }
+        }
+        
+        
+        function deleteSelectedScans() {
+            const selectedCheckboxes = document.querySelectorAll('.scan-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                return;
+            }
+            
+            if (confirm(`${selectedCheckboxes.length} tarama kaydını silmek istediğinize emin misiniz?`)) {
+                const ids = Array.from(selectedCheckboxes).map(checkbox => parseInt(checkbox.dataset.id));
+                deleteScanRecords(ids);
+            }
+        }
+        
+       
+        function deleteScanRecords(ids) {
+            fetch('/api/scan_history/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ids: ids }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    loadScanHistory(); 
+                } else if (data.error) {
+                    alert(`Hata: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                alert('Tarama kayıtları silinirken bir hata oluştu!');
+            });
+        }
+        
+        
+        function updateDeleteButtonState() {
+            const selectedCheckboxes = document.querySelectorAll('.scan-checkbox:checked');
+            const deleteButton = document.getElementById('delete-selected');
+            
+            deleteButton.disabled = selectedCheckboxes.length === 0;
+        }
+        
+        
+        function getScanTypeName(scanType) {
+            switch(scanType) {
+                case 'ip': return 'IP Taraması';
+                case 'mac': return 'MAC Taraması';
+                case 'os': return 'İşletim Sistemi Taraması';
+                case 'services': return 'Servis Taraması';
+                default: return scanType;
+            }
+        }
+        
+       
+        function debugDatabase() {
+            document.getElementById('loading-message').style.display = 'flex';
+            document.getElementById('scan-history-table').style.display = 'none';
+            document.getElementById('no-records').style.display = 'none';
+            
+            fetch('/api/debug/database')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Debug bilgileri:', data);
+                    document.getElementById('loading-message').style.display = 'none';
+                    
+                    let debugResult = document.createElement('div');
+                    debugResult.className = 'no-records';
+                    debugResult.style.textAlign = 'left';
+                    
+                    let resultHTML = `
+                        <h3>Sistem Kontrol Sonuçları</h3>
+                        <p><strong>Durum:</strong> ${data.status === 'success' ? 'Başarılı ✅' : 'Hata ❌'}</p>
+                        <p><strong>Mesaj:</strong> ${data.message}</p>
+                        
+                        <h4>Veritabanı Bilgileri</h4>
+                        <p><strong>Bağlantı:</strong> ${data.debug_info.connection ? 'Başarılı ✅' : 'Başarısız ❌'}</p>
+                        <p><strong>Host:</strong> ${data.debug_info.database_config.host}</p>
+                        <p><strong>Veritabanı:</strong> ${data.debug_info.database_config.database}</p>
+                        
+                        <h4>Tablo Bilgileri</h4>
+                    `;
+                    
+                    if (data.debug_info.tables.list && data.debug_info.tables.list.length > 0) {
+                        resultHTML += `<p><strong>Tablolar:</strong> ${data.debug_info.tables.list.join(', ')} ✅</p>`;
+                        
+                        if ('users_count' in data.debug_info.tables) {
+                            resultHTML += `<p><strong>Kullanıcı Sayısı:</strong> ${data.debug_info.tables.users_count}</p>`;
+                        }
+                        
+                        if ('scan_history_count' in data.debug_info.tables) {
+                            resultHTML += `<p><strong>Toplam Tarama Kaydı:</strong> ${data.debug_info.tables.scan_history_count}</p>`;
+                        }
+                        
+                        if ('user_scan_history_count' in data.debug_info.tables) {
+                            resultHTML += `<p><strong>Sizin Tarama Kayıtlarınız:</strong> ${data.debug_info.tables.user_scan_history_count}</p>`;
+                        }
+                    } else {
+                        resultHTML += `<p><strong>Tablolar:</strong> Tablolar bulunamadı ❌</p>`;
+                    }
+                    
+                    if (Object.keys(data.debug_info.user_info).length > 0) {
+                        resultHTML += `
+                            <h4>Kullanıcı Bilgileri</h4>
+                            <p><strong>Kullanıcı ID:</strong> ${data.debug_info.user_info.id}</p>
+                            <p><strong>Kullanıcı Adı:</strong> ${data.debug_info.user_info.username}</p>
+                            <p><strong>Ad Soyad:</strong> ${data.debug_info.user_info.fullname}</p>
+                        `;
+                    }
+                    
+                    if (data.debug_info.recent_scans && data.debug_info.recent_scans.length > 0) {
+                        resultHTML += `
+                            <h4>Son Taramalar</h4>
+                            <ul>
+                        `;
+                        
+                        data.debug_info.recent_scans.forEach(scan => {
+                            resultHTML += `<li>ID: ${scan.id}, Tür: ${getScanTypeName(scan.scan_type)}, Tarih: ${scan.created_at}</li>`;
+                        });
+                        
+                        resultHTML += `</ul>`;
+                    } else if (data.debug_info.tables && 'user_scan_history_count' in data.debug_info.tables && data.debug_info.tables.user_scan_history_count === 0) {
+                        resultHTML += `
+                            <h4>Tarama Geçmişi</h4>
+                            <p>Henüz tarama kaydınız bulunmamaktadır. Ana sayfadan tarama yaptıktan sonra kayıtlarınızı burada görebilirsiniz.</p>
+                            <p><a href="{{ url_for('index') }}" class="button">Ana Sayfa'ya Git</a></p>
+                        `;
+                    }
+                    
+                    debugResult.innerHTML = resultHTML;
+                    
+                    
+                    const historyContainer = document.getElementById('history-container');
+                    while (historyContainer.firstChild) {
+                        historyContainer.removeChild(historyContainer.firstChild);
+                    }
+                    
+                   
+                    historyContainer.appendChild(document.getElementById('loading-message'));
+                    historyContainer.appendChild(debugResult);
+                    
+                   
+                    const refreshButton = document.createElement('button');
+                    refreshButton.className = 'button';
+                    refreshButton.style.marginTop = '20px';
+                    refreshButton.textContent = 'Tarama Geçmişine Geri Dön';
+                    refreshButton.addEventListener('click', loadScanHistory);
+                    debugResult.appendChild(refreshButton);
+                })
+                .catch(error => {
+                    console.error('Debug hatası:', error);
+                    document.getElementById('loading-message').style.display = 'none';
+                    document.getElementById('no-records').style.display = 'block';
+                    
+                    const noRecordsElement = document.getElementById('no-records');
+                    noRecordsElement.innerHTML = `
+                        <h3>Sistem Kontrol Hatası</h3>
+                        <p>Sistem durumu kontrol edilirken bir hata oluştu!</p>
+                        <p>Hata detayı: ${error.message}</p>
+                        <p>Tekrar denemek için sayfayı yenileyin veya Ana Sayfa'ya dönün.</p>
+                        <p><a href="{{ url_for('index') }}" class="button">Ana Sayfa'ya Git</a></p>
+                    `;
+                });
+        }
+        
+        
+        function downloadPDF(scanId) {
+            const pdfBtn = event.currentTarget;
+            pdfBtn.disabled = true;
+            pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            fetch(`/api/export_pdf/${scanId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('PDF oluşturulamadı');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `tarama_${scanId}_netpulse.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                })
+                .catch(err => {
+                    alert('PDF indirme sırasında hata: ' + err.message);
+                })
+                .finally(() => {
+                    pdfBtn.disabled = false;
+                    pdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i>';
+                });
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,3740 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetPulse - Ağ İzleme Paneli</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+       
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: rgba(26, 35, 56, 0.8);
+            margin-bottom: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navbar-user {
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-user .user-icon {
+            color: #5B6EFF;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .navbar-user .user-name {
+            color: #B0B8D1;
+            font-weight: 600;
+        }
+        
+        .navbar-actions a {
+            color: #B0B8D1;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background-color: #242e48;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .navbar-actions a:hover {
+            background-color: #FF6B6B;
+            color: white;
+        }
+        
+       
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background-color: #1a1a2e;
+            color: #B0B8D1;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .sidebar.collapsed {
+            width: 60px;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #fff;
+        }
+        
+        .sidebar.collapsed .sidebar-header h1 {
+            display: none;
+        }
+        
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #B0B8D1;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        .sidebar-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #B0B8D1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #242e48;
+            color: #fff;
+        }
+        
+        .sidebar-item.active {
+            background-color: #5B6EFF;
+            color: #fff;
+        }
+        
+        .sidebar-item i {
+            font-size: 18px;
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar.collapsed .sidebar-item span {
+            display: none;
+        }
+        
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .user-info i {
+            margin-right: 10px;
+            color: #5B6EFF;
+        }
+        
+        .sidebar.collapsed .user-info span {
+            display: none;
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            color: #B0B8D1;
+            text-decoration: none;
+            padding: 8px 0;
+        }
+        
+        .logout-btn:hover {
+            color: #FF6B6B;
+        }
+        
+        .logout-btn i {
+            margin-right: 10px;
+        }
+        
+        .sidebar.collapsed .logout-btn span {
+            display: none;
+        }
+        
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #0f172a;
+        }
+        
+        .main-content.expanded {
+            margin-left: 60px;
+        }
+        
+        .main-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .main-header h1 {
+            margin: 0 auto;
+            color: #fff;
+        }
+        
+        .user-info-mobile {
+            display: none;
+            align-items: center;
+        }
+        
+        .user-info-mobile span {
+            margin-right: 10px;
+            color: #B0B8D1;
+        }
+        
+        .user-info-mobile a {
+            color: #B0B8D1;
+            text-decoration: none;
+        }
+        
+        .user-info-mobile a:hover {
+            color: #FF6B6B;
+        }
+        
+        
+        .page-content {
+            flex: 1;
+        }
+        
+       
+        .results-container {
+            margin-top: 20px;
+        }
+        
+        .chart-container {
+            background: #1E1E2E;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            height: 400px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; 
+        }
+        
+        .chart-container h3 {
+            align-self: flex-start;
+            margin-left: 15px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        
+        .chart-container canvas {
+            align-self: center;
+        }
+        
+        .results-table {
+            background: #1E1E2E;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .traffic-chart-container {
+            position: relative;
+            height: 300px;
+            background: #1E1E2E;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .speed-results {
+            background: #1E1E2E;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .speed-results canvas {
+            width: 90% !important;
+            height: 90% !important;
+            display: block;
+            margin: auto;
+        }
+        
+       
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 250px;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .main-header {
+                display: flex;
+            }
+            
+            .user-info-mobile {
+                display: flex;
+            }
+            
+            #mobile-sidebar-toggle {
+                display: block;
+            }
+        }
+        
+        
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+            color: #B0B8D1;
+            font-size: 14px;
+        }
+        
+       
+        .results-table table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #B0B8D1;
+        }
+        
+        .results-table th, .results-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .results-table th {
+            background-color: #242e48;
+            color: #fff;
+        }
+        
+        .results-table tr:hover {
+            background-color: rgba(91, 110, 255, 0.1);
+        }
+        
+        .network-topology {
+            background: #1E1E2E;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            height: 400px;
+            position: relative;
+        }
+        .node {
+            cursor: pointer;
+        }
+        .node text {
+            font-size: 12px;
+            fill: #B0B8D1;
+        }
+        .link {
+            stroke: rgba(100, 149, 237, 0.5);
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 3px rgba(100, 149, 237, 0.3));
+        }
+        .node-icon {
+            font-size: 24px;
+        }
+        .topology-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .topology-controls .button {
+            padding: 8px 15px;
+        }
+        .network-topology {
+            overflow: hidden;
+            position: relative;
+            height: 600px;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .network-topology svg {
+            width: 100%;
+            height: 100%;
+        }
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: twinkle 5s infinite;
+            animation-delay: calc(var(--delay) * 1s);
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.08;
+            pointer-events: none;
+        }
+        .router-node {
+            filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.8));
+        }
+        
+        .node-label {
+            text-shadow: 0 0 5px #000, 0 0 10px #000;
+            fill: #B0B8D1;
+            font-weight: 500;
+        }
+        .security-panel {
+            background: rgba(26, 35, 56, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .security-status {
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #34C759;
+            font-weight: 600;
+        }
+
+        .status-indicator i {
+            font-size: 20px;
+        }
+
+        .alerts-container, .suspicious-ips {
+            margin-top: 20px;
+        }
+
+        .alerts-list, .ip-list {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .alert-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            background: rgba(255, 59, 48, 0.1);
+            border-left: 4px solid #FF3B30;
+        }
+
+        .alert-item.high {
+            background: rgba(255, 59, 48, 0.1);
+            border-left-color: #FF3B30;
+        }
+
+        .alert-item.medium {
+            background: rgba(255, 149, 0, 0.1);
+            border-left-color: #FF9500;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .alert-time {
+            font-size: 0.8em;
+            color: #B0B8D1;
+        }
+
+        .alert-message {
+            font-size: 0.9em;
+            color: #B0B8D1;
+        }
+
+        .ip-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: rgba(91, 110, 255, 0.1);
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ip-address {
+            color: #B0B8D1;
+        }
+
+        .ip-status {
+            font-size: 0.8em;
+            color: #FF3B30;
+        }
+
+        .traffic-report-panel {
+            background: rgba(26, 35, 56, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .report-controls {
+            margin-bottom: 15px;
+        }
+
+        .report-status {
+            color: #B0B8D1;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .report-results {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(91, 110, 255, 0.1);
+            border-radius: 6px;
+        }
+
+        .result-item .label {
+            color: #B0B8D1;
+        }
+
+        .result-item .value {
+            color: #5B6EFF;
+            font-weight: 600;
+        }
+
+        .ddos-analysis {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(176, 184, 209, 0.2);
+        }
+
+        .risk-level {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .risk-level .value.high {
+            color: #FF3B30;
+        }
+
+        .risk-level .value.medium {
+            color: #FF9500;
+        }
+
+        .risk-level .value.low {
+            color: #34C759;
+        }
+
+        .risk-message {
+            color: #B0B8D1;
+            font-size: 14px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(91, 110, 255, 0.1);
+            border-radius: 6px;
+        }
+
+        .result-label {
+            color: #B0B8D1;
+        }
+
+        .result-value {
+            color: #5B6EFF;
+            font-weight: 600;
+        }
+
+        .ddos-risk {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .ddos-risk.high {
+            background: rgba(255, 59, 48, 0.1);
+            border-left: 4px solid #FF3B30;
+        }
+
+        .ddos-risk.medium {
+            background: rgba(255, 149, 0, 0.1);
+            border-left: 4px solid #FF9500;
+        }
+
+        .ddos-risk.low {
+            background: rgba(52, 199, 89, 0.1);
+            border-left: 4px solid #34C759;
+        }
+
+        .ddos-risk.normal {
+            background: rgba(91, 110, 255, 0.1);
+            border-left: 4px solid #5B6EFF;
+        }
+        
+        
+        .scan-history-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .history-filter {
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #242e48;
+            color: #B0B8D1;
+            border: none;
+            min-width: 200px;
+        }
+        
+        .history-container {
+            background: #1E1E2E;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            min-height: 400px;
+        }
+        
+        .history-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #B0B8D1;
+            text-align: center;
+        }
+        
+        .history-empty i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #5B6EFF;
+        }
+        
+        .history-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(91, 110, 255, 0.1);
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 4px solid #5B6EFF;
+        }
+        
+        .history-item:hover {
+            background: rgba(91, 110, 255, 0.15);
+        }
+        
+        .history-item.ip {
+            border-left-color: #5B6EFF;
+        }
+        
+        .history-item.mac {
+            border-left-color: #A78BFA;
+        }
+        
+        .history-item.os {
+            border-left-color: #34C759;
+        }
+        
+        .history-item.services {
+            border-left-color: #FF9500;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .history-type {
+            display: flex;
+            align-items: center;
+        }
+        
+        .history-type i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .history-time {
+            color: #B0B8D1;
+            font-size: 0.9em;
+        }
+        
+        .history-content {
+            margin-top: 10px;
+        }
+        
+        .history-summary {
+            color: #B0B8D1;
+            margin-bottom: 5px;
+        }
+        
+        .history-actions {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .history-actions button {
+            padding: 5px 10px;
+            border-radius: 6px;
+            background-color: transparent;
+            border: 1px solid;
+            color: #5B6EFF;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .history-actions button:hover {
+            background-color: rgba(91, 110, 255, 0.2);
+        }
+        
+        .history-actions .delete-btn {
+            border-color: #FF6B6B;
+            color: #FF6B6B;
+        }
+        
+        .history-actions .delete-btn:hover {
+            background-color: rgba(255, 107, 107, 0.2);
+        }
+        
+        .history-actions .view-btn {
+            border-color: #5B6EFF;
+            color: #5B6EFF;
+        }
+
+        .pdf-btn {
+            color: #d32f2f;
+            background: linear-gradient(90deg, #ffd6d6 0%, #fff 100%);
+            border: 1px solid #d32f2f22;
+            box-shadow: 0 2px 8px rgba(211,47,47,0.08);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+            border-radius: 5px;
+            margin-left: 5px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        .pdf-btn:hover {
+            background: linear-gradient(90deg, #d32f2f 0%, #ff5252 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(211,47,47,0.18);
+        }
+        .pdf-btn:active {
+            background: #b71c1c;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>NetPulse</h1>
+            <button id="sidebar-toggle" class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#" class="sidebar-item active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Ana Sayfa</span>
+            </a>
+            <a href="#" class="sidebar-item" data-page="topology">
+                <i class="fas fa-project-diagram"></i>
+                <span>Ağ Topolojisi</span>
+            </a>
+            <a href="#" class="sidebar-item" data-page="speed">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Ağ Hızı</span>
+            </a>
+            <a href="#" class="sidebar-item" data-page="traffic">
+                <i class="fas fa-chart-line"></i>
+                <span>Ağ Trafiği İzleme</span>
+            </a>
+            <a href="#" class="sidebar-item" data-page="scan-history">
+                <i class="fas fa-history"></i>
+                <span>Tarama Geçmişi</span>
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>{{ session.get('fullname', 'KullanÄ±cÄ±') }}</span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Çıkış Yap</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <div class="main-header">
+            <button id="mobile-sidebar-toggle" class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>NetPulse</h1>
+            <div class="user-info-mobile">
+                <span>{{ session.get('fullname', 'Kullanıcı') }}</span>
+                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+
+        <!-- Ana Sayfa İçeriği -->
+        <div class="page-content" id="home-page">
+            <div class="section">
+                <h2>Ağ Taraması</h2>
+                <div class="scan-section">
+                    <div class="scan-text">Ağınızın nabzını dinleyin!</div>
+                    <div class="button-group">
+                        <button class="button" onclick="scan('ip')" aria-label="IP Adreslerini Tara">IP Adresleri</button>
+                        <button class="button" onclick="scan('mac')" aria-label="MAC Adreslerini Tara">MAC Adresleri</button>
+                        <button class="button" onclick="scan('os')" aria-label="İşletim Sistemlerini Tara">İşletim Sistemleri</button>
+                        <button class="button" onclick="scan('services')" aria-label="Açık Servisleri ve Portları Tara">Açık Servisler/Portlar</button>
+                    </div>
+                </div>
+                
+                <div class="loading-message" id="loading-message" style="display: none;">
+                    <span>Tarama yapılıyor</span>
+                    <span class="dots">
+                        <span class="dot">.</span>
+                        <span class="dot">.</span>
+                        <span class="dot">.</span>
+                    </span>
+                </div>
+
+                <div class="results-container">
+                    <div class="chart-container" id="os-chart-container" style="display: none;">
+                        <h3>İşletim Sistemleri Dağılımı</h3>
+                        <canvas id="os-chart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container" id="ports-chart-container" style="display: none;">
+                        <h3>En Çok Görülen Açık Portlar</h3>
+                        <canvas id="ports-chart"></canvas>
+                    </div>
+                    
+                    <div class="results-table" id="results-table" style="display: none;">
+                        <h3>Tarama Sonuçları</h3>
+                        <div class="table-container" id="table-container"></div>
+                    </div>
+
+                    <div class="results-text" id="result-text"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ağ Topolojisi İçeriği -->
+        <div class="page-content" id="topology-page" style="display: none;">
+            <div class="section big-section">
+                <h2>Ağ Topolojisi</h2>
+                <div class="button-container topology-controls">
+                    <button class="button" onclick="updateTopology()" aria-label="Ağ Topolojisini Çiz">Topolojiyi Çiz</button>
+                    <button class="button" onclick="zoomIn()" aria-label="Yakınlaştır">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button class="button" onclick="zoomOut()" aria-label="Uzaklaştır">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button class="button" onclick="resetZoom()" aria-label="Sıfırla">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div id="network-topology" class="network-topology">
+                    <div class="loading-message" id="topology-loading-message" style="display: none;">
+                        <span>Ağ Topolojisi Oluşturuluyor...</span>
+                        <span class="dots">
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                            <span class="dot">.</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ağ Hızı İçeriği -->
+        <div class="page-content" id="speed-page" style="display: none;">
+            <div class="section">
+                <h2>Ağ Hızı</h2>
+                <div class="button-container">
+                    <button class="button" onclick="measureNetworkSpeed()" aria-label="Ağ Hızını Ölç">Hızı Ölç</button>
+                </div>
+                <div class="loading-message" id="speed-loading-message" style="display: none;">
+                    <span>Ölçüm yapılıyor</span>
+                    <span class="dots">
+                        <span class="dot">.</span>
+                        <span class="dot">.</span>
+                        <span class="dot">.</span>
+                    </span>
+                </div>
+                <div class="speed-results">
+                    <canvas id="speed-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ağ Trafiği İzleme İçeriği -->
+        <div class="page-content" id="traffic-page" style="display: none;">
+            <div class="section">
+                <h2>Anlık Ağ Trafiği İzleme</h2>
+                <div class="button-container">
+                    <button class="button" id="traffic-toggle-btn" onclick="toggleTrafficMonitoring()" aria-label="Trafik İzlemeyi Başlat/Durdur">İzlemeyi Başlat</button>
+                </div>
+                <div class="traffic-status" id="traffic-status" style="text-align: center; margin: 5px 0; font-size: 12px; color: #B0B8D1;">
+                    Durum: Pasif
+                </div>
+                <div id="monitoring-type" style="text-align: center; margin: 5px 0; font-size: 13px; color: #5B6EFF; font-weight: bold;">
+                    Tüm ağ trafiği izleniyor
+                </div>
+                <div class="traffic-chart-container">
+                    <canvas id="traffic-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Ağ Trafiği Raporu</h2>
+                <div class="traffic-report-panel">
+                    <div class="report-results" id="reportResults">
+                        <div class="result-item">
+                            <span class="result-label">İzleme Süresi:</span>
+                            <span class="result-value" id="report-duration">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Ortalama Gelen Paket:</span>
+                            <span class="result-value" id="report-avg-incoming">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Ortalama Giden Paket:</span>
+                            <span class="result-value" id="report-avg-outgoing">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Maksimum Gelen Paket:</span>
+                            <span class="result-value" id="report-max-incoming">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Maksimum Giden Paket:</span>
+                            <span class="result-value" id="report-max-outgoing">-</span>
+                        </div>
+                        <div class="ddos-risk">
+                            <h4>DDoS Risk Seviyesi: <span id="risk-level" class="value">-</span></h4>
+                            <p id="risk-message">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tarama Geçmişi İçeriği -->
+        <div class="page-content" id="scan-history-page" style="display: none;">
+            <div class="section">
+                <h2>Tarama Geçmişi</h2>
+                <div class="scan-history-controls">
+                    <select id="history-filter" class="history-filter">
+                        <option value="all">Tüm Taramalar</option>
+                        <option value="ip">IP Taramaları</option>
+                        <option value="mac">MAC Taramaları</option>
+                        <option value="os">İşletim Sistemi Taramaları</option>
+                        <option value="services">Port Taramaları</option>
+                    </select>
+                    <button class="button" onclick="clearScanHistory()" aria-label="Geçmişi Temizle">Geçmişi Temizle</button>
+                </div>
+                
+                <div class="history-container">
+                    <div class="history-empty" id="history-empty" style="display: none;">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Henüz bir tarama geçmişiniz bulunmuyor.</p>
+                    </div>
+                    
+                    <div class="history-list" id="history-list">
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>2025 NetPulse developed by <a href="https://github.com/serayesenn" target="_blank">Seray Esen</a></p>
+        </footer>
+    </div>
+
+    <script>
+        let speedChart = null;
+        let trafficChart = null;
+        let scanResults = { ip: null, mac: null, os: null, services: null };
+        let networkTopology = null;
+        let svg = null;
+        let mainGroup = null;
+        let currentZoom = 1;
+        const zoomStep = 0.2;
+        let trafficMonitoringActive = false;
+        let trafficMonitoringInterval = null;
+        let trafficData = {
+            labels: [],
+            outgoing: [],
+            incoming: []
+        };
+        let reportDataCache = null;
+        
+        
+        let trafficStats = {
+            startTime: null,
+            maxIncoming: 0,
+            maxOutgoing: 0,
+            incomingSum: 0,
+            outgoingSum: 0,
+            sampleCount: 0
+        };
+        
+        
+        let scanHistory = [];
+        
+        
+        let isMonitoring = false;
+        let monitoringStartTime = null;
+        let networkSpeedChart = null;
+        let chartData = {
+            labels: [],
+            incoming: [],
+            outgoing: []
+        };
+        
+        
+        let osChart = null;
+       
+        let portsChart = null;
+        
+      
+        document.addEventListener('DOMContentLoaded', function() {
+           
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            });
+            
+            mobileSidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
+            
+         
+            const menuItems = document.querySelectorAll('.sidebar-item');
+            const pages = document.querySelectorAll('.page-content');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    
+                    menuItems.forEach(mi => mi.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    
+                    const targetPage = this.getAttribute('data-page');
+                    pages.forEach(page => {
+                        if (page.id === targetPage + '-page') {
+                            page.style.display = 'block';
+                            
+                           
+                            if (targetPage === 'topology') {
+                                const svgElement = document.querySelector('#network-topology svg');
+                                if (!svgElement) {
+                                    loadDefaultTopology();
+                                }
+                            }
+                            
+                            if (targetPage === 'scan-history') {
+                                loadScanHistory();
+                            }
+                        } else {
+                            page.style.display = 'none';
+                        }
+                    });
+                    
+                    
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+            
+           
+            const homeMenuItem = document.querySelector('[data-page="home"]');
+            if (homeMenuItem) {
+               
+                menuItems.forEach(mi => mi.classList.remove('active'));
+                homeMenuItem.classList.add('active');
+               
+                pages.forEach(page => {
+                    if (page.id === 'home-page') {
+                        page.style.display = 'block';
+                    } else {
+                        page.style.display = 'none';
+                    }
+                });
+            }
+            
+            
+            loadScanHistoryFromStorage();
+            
+            
+            const historyFilter = document.getElementById('history-filter');
+            if (historyFilter) {
+                historyFilter.addEventListener('change', function() {
+                    filterScanHistory(this.value);
+                });
+            }
+            
+        
+        });
+        
+       
+        function simplifyOSName(osString) {
+           
+            if (osString.includes("Muhtemelen Bilinmeyen") || osString === "Bilinmeyen" || osString.includes("Diğer Cihaz")) {
+                return "Yanıt Vermeyen Cihaz";
+            }
+            
+           
+            let osName = "Yanıt Vermeyen Cihaz";
+            
+            if (osString.includes("Windows")) {
+                osName = "Windows";
+            } else if (osString.includes("Android")) {
+                osName = "Android";
+            } else if (osString.includes("Linux") || osString.includes("Unix")) {
+                osName = "Linux/Unix";
+            } else if (osString.includes("macOS") || osString.includes("iOS") || osString.includes("Apple")) {
+                osName = "Apple";
+            } else if (osString.includes("Router") || osString.includes("Network Device") || osString.includes("Ağ Cihazı")) {
+                osName = "Router/Ağ Cihazı";
+            }
+            
+            return osName;
+        }
+        
+        
+        function createOSChart(osData, containerId = 'os-chart-container', canvasId = 'os-chart') {
+            const chartContainer = document.getElementById(containerId);
+            if (!chartContainer) return;
+            chartContainer.style.display = 'flex';
+            chartContainer.style.flexDirection = 'column';
+            chartContainer.style.alignItems = 'center';
+            chartContainer.style.justifyContent = 'center';
+            chartContainer.style.height = '400px';
+
+          
+            let canvas = document.getElementById(canvasId);
+            if (!canvas) {
+               
+                const oldCanvas = chartContainer.querySelector('canvas');
+                if (oldCanvas) oldCanvas.remove();
+                canvas = document.createElement('canvas');
+                canvas.id = canvasId;
+                chartContainer.appendChild(canvas);
+            } else {
+                
+                if (window.osChart) { window.osChart.destroy(); }
+            }
+            const ctx = canvas.getContext('2d');
+
+           
+            const osLabels = [];
+            const osValues = [];
+            const osColors = [];
+            for (const [host, os] of Object.entries(osData)) {
+                const simplifiedOS = simplifyOSName(os);
+                let color = "#A78BFA";
+                if (simplifiedOS.includes("Windows")) color = "#5B6EFF";
+                else if (simplifiedOS.includes("Linux")) color = "#34C759";
+                else if (simplifiedOS.includes("Apple")) color = "#FF2D55";
+                else if (simplifiedOS.includes("Android")) color = "#FF9500";
+                else if (simplifiedOS.includes("Router")) color = "#FF6B6B";
+                const existingIndex = osLabels.indexOf(simplifiedOS);
+                if (existingIndex !== -1) {
+                    osValues[existingIndex]++;
+                } else {
+                    osLabels.push(simplifiedOS);
+                    osValues.push(1);
+                    osColors.push(color);
+                }
+            }
+            if (!osLabels.includes("Router/Ağ Cihazı")) {
+                osLabels.push("Router/Ağ Cihazı");
+                osValues.push(0);
+                osColors.push("#FF6B6B");
+            }
+           
+            window.osChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: osLabels,
+                    datasets: [{
+                        data: osValues,
+                        backgroundColor: osColors,
+                        borderColor: '#1E1E2E',
+                        borderWidth: 2,
+                        hoverOffset: 10 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#B0B8D1',
+                                font: {
+                                    size: 13, 
+                                },
+                                boxWidth: 20, 
+                                padding: 15, 
+                                sort: function(a, b) {
+                                    
+                                    if (a.text === "Yanıt Vermeyen Cihaz") return 1;
+                                    if (b.text === "Yanıt Vermeyen Cihaz") return -1;
+                                    
+                                    return 0;
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw;
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'İşletim Sistemleri Dağılımı',
+                            color: '#B0B8D1',
+                            font: {
+                                size: 18, 
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 20,
+                            top: 10,
+                            bottom: 10
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+        
+       
+        function createPortsChart(servicesData) {
+            const ctx = document.getElementById('ports-chart').getContext('2d');
+            
+            
+            if (portsChart) {
+                portsChart.destroy();
+            }
+            
+          
+            const portStats = {};
+            
+            
+            for (const [host, ports] of Object.entries(servicesData)) {
+                if (typeof ports === 'object' && ports !== null && !ports.error) {
+                    for (const [port, info] of Object.entries(ports)) {
+                        const portNumber = port;
+                        const serviceName = info.service || 'Unknown';
+                        
+                        const portKey = `${portNumber} (${serviceName})`;
+                        if (portStats[portKey]) {
+                            portStats[portKey]++;
+                        } else {
+                            portStats[portKey] = 1;
+                        }
+                    }
+                }
+            }
+            
+        
+            const sortedPorts = Object.entries(portStats)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            const portLabels = sortedPorts.map(item => item[0]);
+            const portValues = sortedPorts.map(item => item[1]);
+            const portColors = [
+                '#5B6EFF', '#FF6B6B', '#34C759', '#FF9500', '#A78BFA'
+            ];
+            
+          
+            portsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: portLabels,
+                    datasets: [{
+                        label: 'Açık Port Sayısı',
+                        data: portValues,
+                        backgroundColor: portColors,
+                        borderColor: '#1E1E2E',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 200,
+                            title: {
+                                display: true,
+                                text: 'paket/saniye',
+                                color: '#B0B8D1'
+                            },
+                            ticks: {
+                                color: '#B0B8D1',
+                                callback: function(value) {
+                                   
+                                    if (value >= 1000) {
+                                        return (value / 1000) + 'K';
+                                    }
+                                    return value;
+                                }
+                            },
+                            grace: '10%' 
+                        },
+                        x: {
+                            ticks: {
+                                color: '#B0B8D1',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#B0B8D1'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed.y.toFixed(2) + ' paket/s';
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 300 
+                    }
+                }
+            });
+        }
+        
+        
+        window.addEventListener('beforeunload', (event) => {
+            showDebugInfo("Sayfa kapatılıyor, son rapor oluşturuluyor...");
+            if (trafficMonitoringActive) {
+                clearInterval(trafficMonitoringInterval);
+                trafficMonitoringInterval = null;
+                trafficMonitoringActive = false;
+                
+                try {
+                    
+                    fetch('/api/traffic_report/stop', { 
+                        method: 'POST',
+                        keepalive: true  
+                    });
+                } catch (error) {
+                    console.error('Rapor oluşturma hatası:', error);
+                }
+            }
+        });
+
+       
+        function drawTopology(data) {
+            
+
+            const container = d3.select("#network-topology");
+            container.selectAll("svg").remove();
+            container.selectAll(".stars").remove();
+            container.selectAll(".nebula").remove();
+            
+            
+            createSpaceBackground(container);
+
+            const width = container.node().getBoundingClientRect().width;
+            const height = container.node().getBoundingClientRect().height;
+            
+           
+            const nodeCount = data.nodes.length;
+            const viewWidth = Math.max(width, nodeCount * 50);
+            const viewHeight = Math.max(height, nodeCount * 50);
+
+          
+            const zoom = d3.zoom()
+                .scaleExtent([0.05, 3])  
+                .on("zoom", (event) => {
+                    mainGroup.attr("transform", event.transform);
+                });
+
+            svg = container.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("viewBox", [0, 0, width, height])
+                .call(zoom);
+                
+           
+            window.currentZoom = zoom;
+
+            
+            const defs = svg.append("defs");
+            
+            
+            const routerGlow = defs.append("radialGradient")
+                .attr("id", "router-glow")
+                .attr("cx", "50%")
+                .attr("cy", "50%")
+                .attr("r", "50%");
+                
+            routerGlow.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", "#FF6B6B")
+                .attr("stop-opacity", 1);
+                
+            routerGlow.append("stop")
+                .attr("offset", "40%")
+                .attr("stop-color", "#FF6B6B")
+                .attr("stop-opacity", 0.7);
+                
+            routerGlow.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", "#FF6B6B")
+                .attr("stop-opacity", 0);
+                
+         
+            const routerPulse = defs.append("filter")
+                .attr("id", "router-pulse")
+                .attr("x", "-50%")
+                .attr("y", "-50%")
+                .attr("width", "200%")
+                .attr("height", "200%");
+                
+            routerPulse.append("feGaussianBlur")
+                .attr("in", "SourceGraphic")
+                .attr("stdDeviation", "10")
+                .attr("result", "blur");
+                
+            routerPulse.append("feColorMatrix")
+                .attr("in", "blur")
+                .attr("mode", "matrix")
+                .attr("values", "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7")
+                .attr("result", "glow");
+                
+            routerPulse.append("feBlend")
+                .attr("in", "SourceGraphic")
+                .attr("in2", "glow")
+                .attr("mode", "normal");
+
+            mainGroup = svg.append("g");
+
+            if (!data.nodes || !data.edges || data.nodes.length === 0) {
+                console.error("Topoloji verisi boş veya hatalı");
+                return;
+            }
+            
+            
+            const linkDistance = Math.min(Math.max(80, 200 - nodeCount * 0.5), 150);
+            const chargeStrength = Math.min(Math.max(-500, -1000 - nodeCount * 5), -2000);
+            
+            const simulation = d3.forceSimulation(data.nodes)
+                .force("link", d3.forceLink(data.edges)
+                    .id(d => d.id)
+                    .distance(linkDistance))
+                .force("charge", d3.forceManyBody()
+                    .strength(chargeStrength))
+                .force("center", d3.forceCenter(viewWidth / 2, viewHeight / 2))
+                .force("x", d3.forceX(viewWidth / 2).strength(0.05))
+                .force("y", d3.forceY(viewHeight / 2).strength(0.05))
+                .force("collision", d3.forceCollide().radius(40));
+
+          
+            const link = mainGroup.append("g")
+                .selectAll("line")
+                .data(data.edges)
+                .join("line")
+                .attr("class", "link");
+
+           
+            const node = mainGroup.append("g")
+                .selectAll("g")
+                .data(data.nodes)
+                .join("g")
+                .attr("class", d => d.type === "Router" ? "router-node" : "device-node")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            
+            node.filter(d => d.type === "Router")
+                .append("circle")
+                .attr("r", 45)
+                .attr("fill", "url(#router-glow)")
+                .attr("opacity", 0.6);
+
+           
+            node.append("circle")
+                .attr("r", d => d.type === "Router" ? 30 : 20)
+                .attr("fill", d => d.type === "Router" ? "#FF6B6B" : "#4ECDC4")
+                .attr("stroke", "#2D3748")
+                .attr("stroke-width", d => d.type === "Router" ? 2 : 1);
+
+           
+            node.filter(d => d.type === "Router")
+                .append("circle")
+                .attr("r", 35)
+                .attr("fill", "none")
+                .attr("stroke", "#FF6B6B")
+                .attr("stroke-width", 1.5)
+                .attr("stroke-opacity", 0.6)
+                .attr("filter", "url(#router-pulse)");
+
+            
+            node.append("text")
+                .attr("class", "node-label")
+                .attr("dy", 40)
+                .attr("text-anchor", "middle")
+                .style("font-size", "10px")
+                .text(d => d.id);
+
+            
+            node.filter(d => d.type === "Router")
+                .append("text")
+                .attr("class", "node-label")
+                .attr("dy", -35)
+                .attr("text-anchor", "middle")
+                .style("font-size", "12px")
+                .text("Router");
+
+            simulation.on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node.attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                
+            }
+            
+           
+            const initialScale = Math.min(
+                width / viewWidth,
+                height / viewHeight
+            ) * 0.9;
+            
+          
+            svg.call(
+                zoom.transform,
+                d3.zoomIdentity
+                    .translate(
+                        (width - viewWidth * initialScale) / 2,
+                        (height - viewHeight * initialScale) / 2
+                    )
+                    .scale(initialScale)
+            );
+            
+            
+            simulation.alphaDecay(0.01);
+        }
+        
+        
+        function createSpaceBackground(container) {
+            // Yıldızlar için div ekle
+            const starsContainer = container.append("div")
+                .attr("class", "stars");
+            
+            
+            for (let i = 0; i < 150; i++) {
+                const size = Math.random() * 2 + 1;
+                starsContainer.append("div")
+                    .attr("class", "star")
+                    .style("width", `${size}px`)
+                    .style("height", `${size}px`)
+                    .style("left", `${Math.random() * 100}%`)
+                    .style("top", `${Math.random() * 100}%`)
+                    .style("--delay", Math.random() * 5);
+            }
+            
+            
+            const colors = ['rgba(255, 100, 100, 0.05)', 'rgba(100, 100, 255, 0.05)', 'rgba(100, 255, 255, 0.05)'];
+            for (let i = 0; i < 5; i++) {
+                const size = Math.random() * 300 + 200;
+                container.append("div")
+                    .attr("class", "nebula")
+                    .style("width", `${size}px`)
+                    .style("height", `${size}px`)
+                    .style("left", `${Math.random() * 80}%`)
+                    .style("top", `${Math.random() * 80}%`)
+                    .style("background-color", colors[Math.floor(Math.random() * colors.length)]);
+            }
+        }
+
+       
+        function zoomIn() {
+            if (!svg || !mainGroup) return;
+            
+            try {
+                const currentTransform = d3.zoomTransform(svg.node());
+                const newScale = Math.min(currentTransform.k * 1.3, 3);
+                
+                
+                const width = svg.node().getBoundingClientRect().width;
+                const height = svg.node().getBoundingClientRect().height;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                
+                const currentCenterX = (centerX - currentTransform.x) / currentTransform.k;
+                const currentCenterY = (centerY - currentTransform.y) / currentTransform.k;
+                
+                
+                const newX = centerX - currentCenterX * newScale;
+                const newY = centerY - currentCenterY * newScale;
+                
+                svg.transition()
+                    .duration(300)
+                    .call(window.currentZoom.transform, 
+                          d3.zoomIdentity
+                            .translate(newX, newY)
+                            .scale(newScale));
+                
+                console.log("Zoom in: " + newScale);
+            } catch (error) {
+                console.error("Zoom hatası:", error);
+            }
+        }
+
+        function zoomOut() {
+            if (!svg || !mainGroup) return;
+            
+            try {
+                const currentTransform = d3.zoomTransform(svg.node());
+                const newScale = Math.max(currentTransform.k / 1.3, 0.05);
+                
+               
+                const width = svg.node().getBoundingClientRect().width;
+                const height = svg.node().getBoundingClientRect().height;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                
+                const currentCenterX = (centerX - currentTransform.x) / currentTransform.k;
+                const currentCenterY = (centerY - currentTransform.y) / currentTransform.k;
+                
+               
+                const newX = centerX - currentCenterX * newScale;
+                const newY = centerY - currentCenterY * newScale;
+                
+                svg.transition()
+                    .duration(300)
+                    .call(window.currentZoom.transform, 
+                          d3.zoomIdentity
+                            .translate(newX, newY)
+                            .scale(newScale));
+                
+                console.log("Zoom out: " + newScale);
+            } catch (error) {
+                console.error("Zoom hatası:", error);
+            }
+        }
+
+        function resetZoom() {
+            if (!svg || !mainGroup) return;
+            
+            try {
+                const width = svg.node().getBoundingClientRect().width;
+                const height = svg.node().getBoundingClientRect().height;
+                
+               
+                const circles = svg.selectAll("circle").nodes();
+                if (circles.length === 0) return;
+                
+                
+                const positions = [];
+                circles.forEach(circle => {
+                    try {
+                        const parentNode = circle.parentNode;
+                        const transform = d3.select(parentNode).attr("transform");
+                        if (transform) {
+                            const match = transform.match(/translate\(([^,]+),([^)]+)\)/);
+                            if (match) {
+                                positions.push({
+                                    x: parseFloat(match[1]),
+                                    y: parseFloat(match[2])
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Pozisyon hesaplama hatası:", e);
+                    }
+                });
+                
+                if (positions.length === 0) {
+                    
+                    svg.transition()
+                        .duration(500)
+                        .call(window.currentZoom.transform, d3.zoomIdentity);
+                    return;
+                }
+                
+                
+                const xValues = positions.map(p => p.x);
+                const yValues = positions.map(p => p.y);
+                const minX = Math.min(...xValues);
+                const maxX = Math.max(...xValues);
+                const minY = Math.min(...yValues);
+                const maxY = Math.max(...yValues);
+                
+               
+                const viewWidth = maxX - minX + 100;
+                const viewHeight = maxY - minY + 100;
+                
+              
+                const centerX = minX + viewWidth / 2;
+                const centerY = minY + viewHeight / 2;
+                
+               
+                const scale = Math.min(
+                    width / viewWidth,
+                    height / viewHeight
+                ) * 0.9;
+                
+               
+                svg.transition()
+                    .duration(500)
+                    .call(window.currentZoom.transform, 
+                          d3.zoomIdentity
+                            .translate(width / 2 - centerX * scale, height / 2 - centerY * scale)
+                            .scale(scale));
+                
+                console.log("Reset zoom: " + scale);
+            } catch (error) {
+                console.error("Reset zoom hatası:", error);
+            }
+        }
+
+        
+        async function loadDefaultTopology() {
+            const loadingMessage = document.querySelector('#topology-loading-message');
+            if (!loadingMessage) {
+                console.error("Topology loading message element not found");
+                return;
+            }
+            
+            try {
+                loadingMessage.style.display = 'flex';
+                console.log("Örnek topoloji gösteriliyor...");
+                
+               
+                const defaultData = {
+                    nodes: [
+                        {id: "192.168.1.1", type: "Router"},
+                        {id: "192.168.1.2", type: "Device"},
+                        {id: "192.168.1.3", type: "Device"},
+                        {id: "192.168.1.4", type: "Device"},
+                        {id: "192.168.1.5", type: "Device"},
+                        {id: "192.168.1.10", type: "Device"},
+                        {id: "192.168.1.15", type: "Device"},
+                        {id: "192.168.1.20", type: "Device"},
+                        {id: "192.168.1.254", type: "Router"}
+                    ],
+                    edges: [
+                        {source: "192.168.1.1", target: "192.168.1.2"},
+                        {source: "192.168.1.1", target: "192.168.1.3"},
+                        {source: "192.168.1.1", target: "192.168.1.4"},
+                        {source: "192.168.1.1", target: "192.168.1.5"},
+                        {source: "192.168.1.254", target: "192.168.1.10"},
+                        {source: "192.168.1.254", target: "192.168.1.15"},
+                        {source: "192.168.1.254", target: "192.168.1.20"},
+                        {source: "192.168.1.1", target: "192.168.1.254"}
+                    ]
+                };
+                
+              
+                drawTopology(defaultData);
+                console.log("Örnek topoloji başarıyla çizildi");
+            } catch (error) {
+                console.error('Örnek topoloji çizme hatası:', error);
+            } finally {
+                if (loadingMessage) {
+                    loadingMessage.style.display = 'none';
+                }
+            }
+        }
+
+       
+        async function updateTopology() {
+            const loadingMessage = document.querySelector('#topology-loading-message');
+            try {
+                loadingMessage.style.display = 'flex';
+                
+              
+                if (!scanResults.ip) {
+                    const ipResponse = await fetch('/api/scan_network?type=ip');
+                    const ipData = await ipResponse.json();
+                    if (!ipData.error) {
+                        scanResults.ip = ipData;
+                    }
+                }
+                
+                const response = await fetch('/api/network_topology?scan_results=' + encodeURIComponent(JSON.stringify(scanResults)));
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error("Topoloji hatası:", data.error);
+                    alert("Topoloji oluşturma hatası: " + data.error);
+                } else {
+                    drawTopology(data);
+                }
+            } catch (error) {
+                console.error('Topoloji güncelleme hatası:', error);
+                alert('Topoloji güncellenirken bir hata oluştu: ' + error.message);
+            } finally {
+                loadingMessage.style.display = 'none';
+            }
+        }
+
+        async function scan(type) {
+            const scanText = document.querySelector('.scan-text');
+            const loadingMessage = document.querySelector('#loading-message');
+            const buttons = document.querySelectorAll('.button');
+
+            try {
+                buttons.forEach(button => button.disabled = true);
+
+                scanText.textContent = type === 'ip' ? 'IP Adresleri Tarama Yapılıyor...' :
+                                      type === 'mac' ? 'MAC Adresleri Tarama Yapılıyor...' :
+                                      type === 'os' ? 'İşletim Sistemleri Tarama Yapılıyor...' :
+                                      'Açık Servisler/Portlar Tarama Yapılıyor...';
+                loadingMessage.style.display = 'flex';
+
+                const response = await fetch(`/api/scan_network?type=${type}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Tarama hatası: ' + data.error);
+                } else {
+                    scanResults[type] = data;
+                    updateResults(data, type);
+                    
+                    
+                    addToScanHistory(type, data);
+                    
+                    
+                    if (type === 'os') {
+                        createOSChart(data.os_details);
+                        document.getElementById('os-chart-container').style.display = 'flex';
+                    } else {
+                        document.getElementById('os-chart-container').style.display = 'none';
+                    }
+                    
+                    
+                    if (type === 'ip') {
+                        await updateTopology();
+                    }
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                alert('Ağ tarama sırasında bir hata oluştu: ' + error.message);
+            } finally {
+                scanText.textContent = 'Ağınızın nabzını yoklayın!';
+                setTimeout(() => loadingMessage.style.display = 'none', 1000);
+                buttons.forEach(button => button.disabled = false);
+            }
+        }
+
+        async function measureNetworkSpeed() {
+            const speedButton = document.querySelector('#speed-page').querySelector('.button');
+            const loadingMessage = document.querySelector('#speed-loading-message');
+            const canvas = document.querySelector('#speed-chart');
+
+            try {
+                speedButton.disabled = true;
+                loadingMessage.style.display = 'flex';
+                canvas.style.display = 'none';
+
+                const response = await fetch('/api/measure_network_speed');
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Hata: ' + data.error);
+                } else {
+                    updateSpeedChart(data);
+                    canvas.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                alert('Ağ hızı ölçümü sırasında bir hata oluştu: ' + error.message);
+            } finally {
+                loadingMessage.style.display = 'none';
+                speedButton.disabled = false;
+            }
+        }
+
+        async function exportToPDF() {
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'loading-message';
+            loadingMessage.innerHTML = `
+                <span>PDF oluşturuluyor</span>
+                <span class="dots">
+                    <span class="dot">.</span>
+                    <span class="dot">.</span>
+                    <span class="dot">.</span>
+                </span>`;
+                
+            const pdfButton = document.querySelector('.button[onclick="exportToPDF()"]');
+            const buttonContainer = pdfButton.parentElement;
+            buttonContainer.appendChild(loadingMessage);
+            pdfButton.disabled = true;
+
+            try {
+                const response = await fetch('/api/export_pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(scanResults)
+                });
+
+                if (!response.ok) {
+                    throw new Error('PDF oluşturma başarısız');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                a.download = `${today}_sonuclar_netpulse.pdf`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('PDF İndirme Hatası:', error);
+                alert('PDF oluşturma sırasında bir hata oluştu: ' + error.message);
+            } finally {
+                buttonContainer.removeChild(loadingMessage);
+                pdfButton.disabled = false;
+            }
+        }
+
+        function updateSpeedChart(data) {
+          
+            const container = document.querySelector('.speed-results');
+            container.innerHTML = '';
+
+            
+            const title = document.createElement('h3');
+            title.textContent = 'Ağ Hızı Sonuçları';
+            title.style.textAlign = 'center';
+            title.style.color = '#B0B8D1';
+            title.style.marginBottom = '10px';
+            container.appendChild(title);
+
+            
+
+           
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.maxWidth = '500px';
+            table.style.margin = '0 auto 10px auto';
+            table.style.background = 'rgba(91,110,255,0.07)';
+            table.style.borderRadius = '10px';
+            table.style.overflow = 'hidden';
+            table.style.boxShadow = '0 2px 12px rgba(91,110,255,0.08)';
+            table.innerHTML = `
+                <thead>
+                    <tr style="background:#242e48;color:#fff;font-size:16px;">
+                        <th style="padding:12px 8px;"></th>
+                        <th style="padding:12px 8px;">Min</th>
+                        <th style="padding:12px 8px;">Ortalama</th>
+                        <th style="padding:12px 8px;">Maks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="font-size:15px;">
+                        <td style="padding:10px 8px;font-weight:600;color:#34C759;"><i class="fas fa-download"></i> Download</td>
+                        <td style="padding:10px 8px;">${data.download.min} Mbps</td>
+                        <td style="padding:10px 8px;">${data.download.avg} Mbps</td>
+                        <td style="padding:10px 8px;">${data.download.max} Mbps</td>
+                    </tr>
+                    <tr style="font-size:15px;">
+                        <td style="padding:10px 8px;font-weight:600;color:#5B6EFF;"><i class="fas fa-upload"></i> Upload</td>
+                        <td style="padding:10px 8px;">${data.upload.min} Mbps</td>
+                        <td style="padding:10px 8px;">${data.upload.avg} Mbps</td>
+                        <td style="padding:10px 8px;">${data.upload.max} Mbps</td>
+                    </tr>
+                    <tr style="font-size:15px;">
+                        <td style="padding:10px 8px;font-weight:600;color:#FF9500;"><i class="fas fa-stopwatch"></i> Ping</td>
+                        <td style="padding:10px 8px;">${data.ping.min} ms</td>
+                        <td style="padding:10px 8px;">${data.ping.avg} ms</td>
+                        <td style="padding:10px 8px;">${data.ping.max} ms</td>
+                    </tr>
+                </tbody>
+            `;
+            container.appendChild(table);
+        }
+
+       
+        function updateResults(data, type) {
+            const resultSection = document.querySelector('#result-text');
+            resultSection.innerHTML = ''; 
+            
+            if (type !== 'os') {
+                const osChartContainer = document.getElementById('os-chart-container');
+                if (osChartContainer) {
+                    osChartContainer.style.display = 'none';
+                }
+            }
+            
+           
+            const resultList = document.createElement('ul');
+            resultList.className = 'results-list';
+            resultList.style.listStyle = 'none';
+            resultList.style.padding = '0';
+            resultList.style.margin = '10px 0';
+            
+            if (type === 'ip') {
+                
+                if (data.ip_addresses && data.ip_addresses.length > 0) {
+                    data.ip_addresses.forEach(ip => {
+                        const item = document.createElement('li');
+                        item.innerHTML = `<i class="fas fa-network-wired"></i> ${ip}`;
+                        item.style.padding = '12px';
+                        item.style.marginBottom = '8px';
+                        item.style.borderRadius = '8px';
+                        item.style.backgroundColor = 'rgba(91, 110, 255, 0.1)';
+                        item.style.borderLeft = '4px solid #5B6EFF';
+                        resultList.appendChild(item);
+                    });
+                } else {
+                    const item = document.createElement('li');
+                    item.innerHTML = '<i class="fas fa-exclamation-circle"></i> IP Adresi Yok';
+                    item.style.padding = '12px';
+                    item.style.borderRadius = '8px';
+                    item.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                    resultList.appendChild(item);
+                }
+            } else if (type === 'mac') {
+                
+                if (data.mac_addresses && data.mac_addresses.length > 0) {
+                    data.mac_addresses.forEach(item => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<i class="fas fa-microchip"></i> ${item}`;
+                        li.style.padding = '12px';
+                        li.style.marginBottom = '8px';
+                        li.style.borderRadius = '8px';
+                        li.style.backgroundColor = 'rgba(167, 139, 250, 0.1)';
+                        li.style.borderLeft = '4px solid #A78BFA';
+                        resultList.appendChild(li);
+                    });
+                } else {
+                    const item = document.createElement('li');
+                    item.innerHTML = '<i class="fas fa-exclamation-circle"></i> MAC Adresi Yok';
+                    item.style.padding = '12px';
+                    item.style.borderRadius = '8px';
+                    item.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                    resultList.appendChild(item);
+                }
+            } else if (type === 'os') {
+               
+                if (data.os_details && Object.keys(data.os_details).length > 0) {
+                    Object.entries(data.os_details).forEach(([host, os]) => {
+                       
+                        const simplifiedOS = simplifyOSName(os);
+                        
+                        let iconClass = simplifiedOS.includes('Windows') ? 'fab fa-windows' :
+                                      simplifiedOS.includes('Linux') ? 'fab fa-linux' :
+                                      simplifiedOS.includes('Apple') ? 'fab fa-apple' :
+                                      simplifiedOS.includes('Android') ? 'fab fa-android' :
+                                      simplifiedOS.includes('Router') ? 'fas fa-wifi' : 'fas fa-server';
+                                  
+                        let color = simplifiedOS.includes('Windows') ? '#5B6EFF' :
+                                  simplifiedOS.includes('Linux') ? '#34C759' :
+                                  simplifiedOS.includes('Apple') ? '#FF2D55' :
+                                  simplifiedOS.includes('Android') ? '#FF9500' :
+                                  simplifiedOS.includes('Router') ? '#FF6B6B' : '#A78BFA';
+                                
+                        const item = document.createElement('li');
+                        item.innerHTML = `<i class="${iconClass}" style="color: ${color}; width: 20px; text-align: center; margin-right: 10px;"></i> <strong>${host}:</strong> <span style="color: ${color}">${simplifiedOS}</span>`;
+                        item.style.padding = '12px';
+                        item.style.marginBottom = '8px';
+                        item.style.borderRadius = '8px';
+                        item.style.backgroundColor = `rgba(${hexToRgb(color)}, 0.1)`;
+                        item.style.borderLeft = `4px solid ${color}`;
+                        resultList.appendChild(item);
+                    });
+                } else {
+                    const item = document.createElement('li');
+                    item.innerHTML = '<i class="fas fa-exclamation-circle"></i> İşletim Sistemi Bilgisi Yok';
+                    item.style.padding = '12px';
+                    item.style.borderRadius = '8px';
+                    item.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                    resultList.appendChild(item);
+                }
+            } else if (type === 'services') {
+                
+                if (data.services && Object.keys(data.services).length > 0) {
+                    Object.entries(data.services).forEach(([host, ports]) => {
+                        const hostItem = document.createElement('li');
+                        
+                        const isLocalDevice = host.includes("(Bu cihaz)");
+                        const displayHost = isLocalDevice ? 
+                            host.replace(" (Bu cihaz)", "") + " <small style='color:#34C759'>(Bu cihaz)</small>" : 
+                            host;
+                        
+                       
+                        let hostIcon = '<i class="fas fa-server"></i>';
+                        
+                        if (ports.error) {
+                            
+                            hostItem.innerHTML = `${hostIcon} <strong>${displayHost}</strong> <span class="device-status error">Yanıt Yok</span>`;
+                            hostItem.style.padding = '12px';
+                            hostItem.style.marginBottom = '8px';
+                            hostItem.style.borderRadius = '8px';
+                            hostItem.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                            hostItem.style.borderLeft = '4px solid #FF6B6B';
+                            
+                          
+                            const detailItem = document.createElement('div');
+                            detailItem.className = 'device-details';
+                            detailItem.id = `details-${host.replace(/\./g, '-').replace(/\s+/g, '-')}`;
+                            detailItem.style.display = 'none';
+                            detailItem.style.padding = '10px 12px 10px 35px';
+                            detailItem.style.marginTop = '4px';
+                            detailItem.style.marginBottom = '10px';
+                            detailItem.style.borderRadius = '8px';
+                            detailItem.style.backgroundColor = 'rgba(255, 107, 107, 0.05)';
+                            detailItem.innerHTML = `<p><i class="fas fa-exclamation-circle"></i> Cihaz yanıt vermedi, çevrimdışı olabilir.</p>`;
+                            
+                            const toggleButton = document.createElement('button');
+                            toggleButton.className = 'toggle-details';
+                            toggleButton.innerHTML = 'Detaylar';
+                            toggleButton.setAttribute('data-target', `details-${host.replace(/\./g, '-').replace(/\s+/g, '-')}`);
+                            toggleButton.style.marginLeft = '10px';
+                            toggleButton.style.padding = '2px 8px';
+                            toggleButton.style.border = '1px solid #FF6B6B';
+                            toggleButton.style.borderRadius = '4px';
+                            toggleButton.style.backgroundColor = 'transparent';
+                            toggleButton.style.color = '#FF6B6B';
+                            toggleButton.style.cursor = 'pointer';
+                            
+                            hostItem.appendChild(toggleButton);
+                            resultList.appendChild(hostItem);
+                            resultList.appendChild(detailItem);
+                        } else {
+                            
+                            let portCount = Object.keys(ports).length;
+                            const hasRisks = data.risks && data.risks[host.replace(" (Bu cihaz)", "")] && Object.keys(data.risks[host.replace(" (Bu cihaz)", "")]).length > 0;
+                            
+                            if (hasRisks) {
+                                hostItem.innerHTML = `${hostIcon} <strong>${displayHost}</strong> <span class="port-count">${portCount} port</span> <span class="device-status risky">açık</span>`;
+                                hostItem.style.borderLeft = '4px solid #FF9500';
+                            } else {
+                                hostItem.innerHTML = `${hostIcon} <strong>${displayHost}</strong> <span class="port-count">${portCount} port</span>`;
+                                hostItem.style.borderLeft = '4px solid #5B6EFF';
+                            }
+                            
+                            hostItem.style.padding = '12px';
+                            hostItem.style.marginBottom = '8px';
+                            hostItem.style.borderRadius = '8px';
+                            hostItem.style.backgroundColor = 'rgba(91, 110, 255, 0.1)';
+                            
+                          
+                            const toggleButton = document.createElement('button');
+                            toggleButton.className = 'toggle-details';
+                            toggleButton.innerHTML = 'Detaylar';
+                            toggleButton.setAttribute('data-target', `details-${host.replace(/\./g, '-').replace(/\s+/g, '-')}`);
+                            toggleButton.style.marginLeft = '10px';
+                            toggleButton.style.padding = '2px 8px';
+                            toggleButton.style.border = '1px solid #5B6EFF';
+                            toggleButton.style.borderRadius = '4px';
+                            toggleButton.style.backgroundColor = 'transparent';
+                            toggleButton.style.color = '#5B6EFF';
+                            toggleButton.style.cursor = 'pointer';
+                            
+                            hostItem.appendChild(toggleButton);
+                            resultList.appendChild(hostItem);
+                            
+                            
+                            const detailsContainer = document.createElement('div');
+                            detailsContainer.className = 'device-details';
+                            detailsContainer.id = `details-${host.replace(/\./g, '-').replace(/\s+/g, '-')}`;
+                            detailsContainer.style.display = 'none';
+                            detailsContainer.style.padding = '10px';
+                            detailsContainer.style.marginTop = '4px';
+                            detailsContainer.style.marginBottom = '10px';
+                            detailsContainer.style.borderRadius = '8px';
+                            detailsContainer.style.backgroundColor = 'rgba(91, 110, 255, 0.05)';
+                            
+                           
+                            const portList = document.createElement('div');
+                            portList.className = 'port-list';
+                            portList.innerHTML = '<h4 style="margin-top: 0; color: #5B6EFF;">Açık Portlar</h4>';
+                            
+                            if (portCount > 0) {
+                                const portTable = document.createElement('table');
+                                portTable.style.width = '100%';
+                                portTable.style.borderCollapse = 'collapse';
+                                portTable.style.marginBottom = '10px';
+                                
+                               
+                                const tableHeader = document.createElement('tr');
+                                tableHeader.innerHTML = `
+                                                                        <th style="text-align: left; padding: 5px 10px; border-bottom: 1px solid rgba(91, 110, 255, 0.2);">Port</th>                                    <th style="text-align: left; padding: 5px 10px; border-bottom: 1px solid rgba(91, 110, 255, 0.2);">Servis</th>                                    <th style="text-align: left; padding: 5px 10px; border-bottom: 1px solid rgba(91, 110, 255, 0.2);">Ne İşe Yarar?</th>
+                                `;
+                                portTable.appendChild(tableHeader);
+                                
+                                
+                                const portExplanations = {
+                                    "135": "Windows bilgisayarlar arasında uzaktan erişim için kullanılır. Bilgisayarınızın diğer Windows cihazlarla iletişim kurmasını sağlar.",
+                                    "139": "Eski Windows ağlarında dosya ve yazıcı paylaşımı için kullanılır. Bilgisayarlar arası kaynak paylaşımını sağlar.",
+                                    "445": "Modern Windows sistemlerinde dosya ve yazıcı paylaşımı için kullanılır. Ağdaki diğer bilgisayarlarla dosya alışverişi yapmak için gereklidir.",
+                                    "137": "NetBIOS İsim Servisi. Windows ağında bilgisayar isimlerini bulmak için kullanılır.",
+                                    "138": "NetBIOS Datagram Servisi. Windows ağında mesaj paylaşımı için kullanılır.",
+                                    "80": "Web sitelerini görüntülemek için kullanılan HTTP portu. İnternet sitelerine bağlanmanızı sağlar.",
+                                    "443": "Güvenli web sitelerini görüntülemek için kullanılan HTTPS portu. Şifreli bağlantı sağlar.",
+                                    "21": "Dosya transferi (FTP) için kullanılır. Uzak sunuculara dosya yüklemenizi sağlar.",
+                                    "22": "Güvenli uzaktan erişim (SSH) için kullanılır. Sistem yöneticilerinin uzaktan güvenli erişimini sağlar.",
+                                    "25": "E-posta göndermek için kullanılan SMTP portu. E-postaların iletilmesini sağlar.",
+                                    "53": "İnternet adreslerini IP adreslerine çeviren DNS portu. Web sitesi isimlerini bulmanızı sağlar.",
+                                    "3389": "Uzak masaüstü bağlantısı için kullanılır. Başka bilgisayarları uzaktan kontrol etmenizi sağlar.",
+                                    "8080": "Alternatif web sunucusu portu. Genellikle test amaçlı veya proxy sunucular için kullanılır.",
+                                    "8443": "Alternatif güvenli web sunucusu portu. Şifreli bağlantı sağlar.",
+                                    "20": "FTP veri transferi için kullanılır. Dosya indirme/yükleme işlemlerini yapar.",
+                                    "23": "Telnet portu. Uzak cihazlara bağlanmak için kullanılır (şifreleme olmadan).",
+                                    "110": "E-posta almak için kullanılan POP3 portu. Posta kutunuzdan e-postaları indirmenizi sağlar.",
+                                    "143": "E-posta almak için kullanılan IMAP portu. E-postaları sunucuda yönetmenizi sağlar.",
+                                    "587": "Alternatif e-posta gönderme portu (SMTP). Genellikle kullanıcı kimlik doğrulaması ile e-posta göndermek için kullanılır.",
+                                    "993": "Güvenli IMAP portu. E-postalarınızı şifreli bağlantı üzerinden almanızı sağlar.",
+                                    "995": "Güvenli POP3 portu. E-postalarınızı şifreli bağlantı üzerinden almanızı sağlar.",
+                                    "67": "DHCP sunucu portu. Cihazlara otomatik IP adresi dağıtır.",
+                                    "68": "DHCP istemci portu. Ağa bağlanan cihazın IP adresi almasını sağlar.",
+                                    "69": "TFTP portu. Basit dosya transferi için kullanılır. Ağ cihazlarının firmware güncellemesi yapmak veya yapılandırma dosyalarını yüklemek için sıklıkla kullanılır.",
+                                    "123": "Zaman senkronizasyonu için kullanılır (NTP). Bilgisayarınızın saatini doğru ayarlar.",
+                                    "514": "Syslog portu. Ağdaki cihazların sistem günlüklerini merkezi bir sunucuya göndermelerini sağlar. Sistem yöneticilerinin farklı cihazların günlüklerini tek bir yerden takip etmesine olanak tanır.",
+                                    "1900": "UPnP portu. Cihazların otomatik olarak birbirini keşfetmesini ve ağda kolayca iletişim kurmasını sağlar. Oyun konsolları, medya oynatıcıları ve yönlendiriciler arasında otomatik bağlantı kurmak için kullanılır.",
+                                    "5353": "Zeroconf/mDNS portu. Ağda yapılandırma gerektirmeden cihazların birbirini otomatik bulmasını sağlar. Apple AirPlay, Chromecast gibi hizmetlerin cihazları keşfetmesi için kullanılır.",
+                                    "5004": "VoIP (internet üzerinden ses iletimi) için kullanılır. İnternet üzerinden telefon görüşmesi yapmanızı sağlar.",
+                                    "5005": "RTP (gerçek zamanlı iletişim) için kullanılır. Sesli ve görüntülü iletişimi destekler.",
+                                    "1883": "MQTT protokolü için kullanılır. Akıllı ev cihazlarının iletişimini sağlar.",
+                                    "8883": "Güvenli MQTT protokolü için kullanılır. Akıllı ev cihazlarının güvenli iletişimini sağlar.",
+                                    "161": "SNMP portu. Ağ cihazlarının izlenmesi ve yönetilmesi için kullanılır.",
+                                    "162": "SNMP bildirimleri (trap) için kullanılır. Ağ cihazlarından uyarı mesajları alınmasını sağlar.",
+                                    "500": "IPsec VPN bağlantısı için kullanılır. Güvenli sanal özel ağ oluşturur.",
+                                    "5060": "SIP (Session Initiation Protocol) portu. İnternet telefonu hizmetleri için kullanılır.",
+                                    "5061": "Güvenli SIP portu. Şifreli internet telefon görüşmeleri sağlar."
+                                };
+                                
+                                
+                                Object.entries(ports).forEach(([port, info], index) => {
+                                    const portRow = document.createElement('tr');
+                                    
+                                    const isRisky = hasRisks && data.risks[host.replace(" (Bu cihaz)", "")][port];
+                                    
+                                    portRow.style.backgroundColor = index % 2 === 0 ? 'transparent' : 'rgba(91, 110, 255, 0.07)';
+                                    
+                                    
+                                    if (isRisky) {
+                                        portRow.style.backgroundColor = 'rgba(255, 149, 0, 0.1)';
+                                    }
+                                    
+                                   
+                                    let serviceName = info.service || 'Bilinmeyen';
+                                    let serviceDetails = info.details || '';
+                                    
+                                   
+                                    if (serviceDetails.includes('(')) {
+                                        serviceDetails = serviceDetails.split('(')[0].trim();
+                                    }
+                                    
+                                    
+                                    if (serviceDetails.includes('Tahmini')) {
+                                        serviceDetails = 'Tahmini port';
+                                    }
+                                    
+                                    
+                                    let portExplanation = portExplanations[port] || serviceDetails || "Bu port, bilgisayarlar arası iletişim için kullanılır.";
+                                    
+                                    const portCell = document.createElement('td');
+                                    portCell.style.padding = '5px 10px';
+                                    portCell.textContent = port;
+                                    
+                                    const serviceCell = document.createElement('td');
+                                    serviceCell.style.padding = '5px 10px';
+                                    serviceCell.textContent = serviceName;
+                                    
+                                    const detailsCell = document.createElement('td');
+                                    detailsCell.style.padding = '5px 10px';
+                                    detailsCell.textContent = portExplanation;
+                                    
+                                    portRow.appendChild(portCell);
+                                    portRow.appendChild(serviceCell);
+                                    portRow.appendChild(detailsCell);
+                                    
+                                  
+                                    if (isRisky) {
+                                        
+                                        const riskRow = document.createElement('tr');
+                                        riskRow.style.backgroundColor = 'rgba(255, 149, 0, 0.05)';
+                                        
+                                        const riskCell = document.createElement('td');
+                                        riskCell.setAttribute('colspan', '3');
+                                        riskCell.style.padding = '8px 10px';
+                                        
+                                        // Port için risk açıklaması var mı kontrol et
+                                        const riskExplanation = securityRiskExplanations[port] || securityRiskExplanations["default"];
+                                        
+                                        riskCell.innerHTML = `<div style="display: flex; align-items: center;">
+                                            <i class="fas fa-exclamation-triangle" style="color: #FF9500; margin-right: 8px;"></i>
+                                            <div><strong>Güvenlik Riski:</strong> ${riskExplanation}</div>
+                                        </div>`;
+                                        
+                                        riskRow.appendChild(riskCell);
+                                        portTable.appendChild(portRow);
+                                        portTable.appendChild(riskRow);
+                                    } else {
+                                        portTable.appendChild(portRow);
+                                    }
+                                });
+                                
+                                portList.appendChild(portTable);
+                            } else {
+                                portList.innerHTML += '<p>Açık port bulunamadı.</p>';
+                            }
+                            
+                            detailsContainer.appendChild(portList);
+                            
+                            
+                            if (hasRisks) {
+                                const riskSection = document.createElement('div');
+                                riskSection.className = 'risk-assessment';
+                                riskSection.innerHTML = '<h4 style="margin-top: 15px; color: #FF9500;">Güvenlik Riskleri</h4>';
+                                
+                                const riskTable = document.createElement('table');
+                                riskTable.style.width = '100%';
+                                riskTable.style.borderCollapse = 'collapse';
+                                
+                                
+                                const riskHeader = document.createElement('tr');
+                                riskHeader.innerHTML = `
+                                    <th style="text-align: left; padding: 5px 10px; border-bottom: 1px solid rgba(255, 149, 0, 0.2);">Port</th>
+                                    <th style="text-align: left; padding: 5px 10px; border-bottom: 1px solid rgba(255, 149, 0, 0.2);">Servis</th>
+                                    <th style="text-align: left; padding: 5px 10px; border-bottom: 1px solid rgba(255, 149, 0, 0.2);">CVE</th>
+                                `;
+                                riskTable.appendChild(riskHeader);
+                                
+                               
+                                let riskCount = 0;
+                                Object.entries(data.risks[host.replace(" (Bu cihaz)", "")]).forEach(([port, info], index) => {
+                                    riskCount++;
+                                    const riskRow = document.createElement('tr');
+                                    riskRow.style.backgroundColor = index % 2 === 0 ? 'rgba(255, 149, 0, 0.05)' : 'rgba(255, 149, 0, 0.1)';
+                                    
+                                    riskRow.innerHTML = `
+                                        <td style="padding: 5px 10px;">${port}</td>
+                                        <td style="padding: 5px 10px;">${info.service || 'Bilinmeyen'}</td>
+                                        <td style="padding: 5px 10px;">${info.cve || 'Bilinmeyen'}</td>
+                                    `;
+                                    
+                                    riskTable.appendChild(riskRow);
+                                });
+                                
+                                if (riskCount > 0) {
+                                    riskSection.appendChild(riskTable);
+                                    riskSection.innerHTML += `
+                                        <div style="margin-top: 10px; padding: 8px; background-color: rgba(255, 149, 0, 0.1); border-radius: 4px;">
+                                            <i class="fas fa-exclamation-triangle" style="color: #FF9500;"></i> 
+                                            <strong>Uyarı:</strong> Bu cihazda potansiyel güvenlik açıkları tespit edildi. Güvenliği artırmak için güncellemeleri kontrol edin ve kullanılmayan servisleri kapatın.
+                                        </div>
+                                    `;
+                                } else {
+                                    riskSection.innerHTML += '<p>Bilinen güvenlik riski bulunamadı.</p>';
+                                }
+                                
+                                detailsContainer.appendChild(riskSection);
+                            } else {
+                               
+                                const safeMessage = document.createElement('div');
+                                safeMessage.style.marginTop = '15px';
+                                safeMessage.style.padding = '8px';
+                                safeMessage.style.backgroundColor = 'rgba(52, 199, 89, 0.1)';
+                                safeMessage.style.borderRadius = '4px';
+                                safeMessage.innerHTML = '<i class="fas fa-shield-alt" style="color: #34C759;"></i> <strong>Güvenli:</strong> Bu cihazda bilinen güvenlik riski tespit edilmedi.';
+                                detailsContainer.appendChild(safeMessage);
+                            }
+                            
+                            resultList.appendChild(detailsContainer);
+                        }
+                    });
+                    
+                    
+                    setTimeout(() => {
+                        document.querySelectorAll('.toggle-details').forEach(button => {
+                            button.addEventListener('click', function() {
+                                const targetId = this.getAttribute('data-target');
+                                const targetElement = document.getElementById(targetId);
+                                
+                                if (targetElement.style.display === 'none') {
+                                    targetElement.style.display = 'block';
+                                    this.textContent = 'Gizle';
+                                } else {
+                                    targetElement.style.display = 'none';
+                                    this.textContent = 'Detaylar';
+                                }
+                            });
+                        });
+                    }, 100);
+                    
+                } else {
+                    const item = document.createElement('li');
+                    item.innerHTML = '<i class="fas fa-exclamation-circle"></i> Açık Servis/Port Yok';
+                    item.style.padding = '12px';
+                    item.style.borderRadius = '8px';
+                    item.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                    resultList.appendChild(item);
+                }
+            }
+            
+            resultSection.appendChild(resultList);
+        }
+
+       
+        
+        
+        function toggleTrafficMonitoring() {
+            const trafficToggleBtn = document.getElementById('traffic-toggle-btn');
+            const trafficStatus = document.getElementById('traffic-status');
+            
+            if (trafficMonitoringActive) {
+               
+                clearInterval(trafficMonitoringInterval);
+                trafficMonitoringInterval = null;
+                trafficMonitoringActive = false;
+                trafficToggleBtn.textContent = 'İzlemeyi Başlat';
+                trafficStatus.textContent = 'Durum: Pasif';
+                trafficStatus.style.color = '#B0B8D1';
+              
+                fetchTrafficReport();
+                generateLocalReport(); 
+            } else {
+                
+                trafficData = {
+                    labels: [],
+                    outgoing: [],
+                    incoming: []
+                };
+                
+                
+                trafficStats = {
+                    startTime: new Date(),
+                    maxIncoming: 0,
+                    maxOutgoing: 0,
+                    incomingSum: 0,
+                    outgoingSum: 0,
+                    sampleCount: 0
+                };
+                
+               
+                if (trafficChart) {
+                    trafficChart.destroy();
+                    trafficChart = null;
+                }
+                
+             
+                updateTrafficChart();
+                
+               
+                trafficMonitoringActive = true;
+                trafficToggleBtn.textContent = 'İzlemeyi Durdur';
+                trafficStatus.textContent = 'Durum: Aktif - Her 3 saniyede bir güncelleniyor';
+                trafficStatus.style.color = '#34C759';
+               
+                startTrafficReportApi();
+                
+               
+                fetchNetworkTraffic();
+                
+                
+                trafficMonitoringInterval = setInterval(fetchNetworkTraffic, 3000);
+            }
+        }
+        
+       
+        function generateLocalReport() {
+            try {
+                if (trafficStats.sampleCount > 0) {
+                  
+                    const durationInSeconds = (new Date() - trafficStats.startTime) / 1000;
+                    
+                    
+                    const avgIncoming = trafficStats.incomingSum / trafficStats.sampleCount;
+                    const avgOutgoing = trafficStats.outgoingSum / trafficStats.sampleCount;
+                    
+                  
+                    const maxIncoming = trafficStats.maxIncoming;
+                    const maxOutgoing = trafficStats.maxOutgoing;
+                    
+                    
+                    let riskLevel = "Normal";
+                    let riskMessage = "Normal trafik seviyeleri. Risk tespit edilmedi.";
+                    
+                    if (maxIncoming > 5000) {
+                        riskLevel = "Yüksek";
+                        riskMessage = "Ciddi DDoS riski tespit edildi. Acil önlem alınmalı!";
+                    } else if (maxIncoming > 2000) {
+                        riskLevel = "Orta";
+                        riskMessage = "Olası DDoS aktivitesi. İzleme altında tutulmalı.";
+                    } else if (maxIncoming > avgIncoming * 3) {
+                        riskLevel = "Düşük";
+                        riskMessage = "Anormal trafik artışı tespit edildi. Dikkatli olunmalı.";
+                    }
+                   
+                    const reportData = {
+                        duration: durationInSeconds,
+                        average_incoming: avgIncoming,
+                        average_outgoing: avgOutgoing,
+                        max_incoming_rate: maxIncoming,
+                        max_outgoing_rate: maxOutgoing,
+                        ddos_risk: {
+                            level: riskLevel,
+                            message: riskMessage
+                        }
+                    };
+                    
+                  
+                    updateTrafficReport(reportData);
+                }
+            } catch (error) {
+                console.error(`Yerel rapor oluşturma hatası: ${error.message}`);
+            }
+        }
+        
+      
+        async function startTrafficReportApi() {
+            try {
+                const response = await fetch('/api/traffic_report/start', { method: 'POST' });
+                return response.ok;
+            } catch (error) {
+                console.error(`Rapor başlatma hatası: ${error.message}`);
+                return false;
+            }
+        }
+        
+        
+        let isReportFetching = false;
+        
+        async function fetchTrafficReport() {
+            
+            if (isReportFetching) {
+                return false;
+            }
+            
+            isReportFetching = true;
+            
+            try {
+                const response = await fetch('/api/traffic_report/stop', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    reportDataCache = data;
+                    
+                   
+                    const isAllZero = data.average_incoming === 0 && 
+                                     data.average_outgoing === 0 && 
+                                     data.max_incoming_rate === 0 && 
+                                     data.max_outgoing_rate === 0;
+                    
+                    
+                    if (isAllZero) {
+                        return true;
+                    }
+                    
+                    
+                    updateTrafficReport(data);
+                    return true;
+                } else {
+                    console.error(`Rapor API yanıt kodu: ${response.status}`);
+                    return false;
+                }
+            } catch (error) {
+                console.error(`Rapor oluşturma hatası: ${error.message}`);
+                return false;
+            } finally {
+                isReportFetching = false;
+            }
+        }
+        
+        
+        
+       
+        function updateTrafficReport(data) {
+           
+            const formatValue = (value) => {
+                if (value === undefined || value === null || isNaN(value)) {
+                    return "0.00";
+                }
+                return Number(value).toFixed(2);
+            };
+            
+          
+            const duration = data.duration || data.monitoring_duration || 0;
+            const avgIncoming = data.average_incoming || data.avg_incoming || data.incoming_avg || 0;
+            const avgOutgoing = data.average_outgoing || data.avg_outgoing || data.outgoing_avg || 0;
+            const maxIncoming = data.max_incoming_rate || data.max_incoming || data.incoming_max || 0;
+            const maxOutgoing = data.max_outgoing_rate || data.max_outgoing || data.outgoing_max || 0;
+            
+           
+            try {
+                document.getElementById('report-duration').textContent = `${formatValue(duration)} saniye`;
+                document.getElementById('report-avg-incoming').textContent = `${formatValue(avgIncoming)} paket/s`;
+                document.getElementById('report-avg-outgoing').textContent = `${formatValue(avgOutgoing)} paket/s`;
+                document.getElementById('report-max-incoming').textContent = `${formatValue(maxIncoming)} paket/s`;
+                document.getElementById('report-max-outgoing').textContent = `${formatValue(maxOutgoing)} paket/s`;
+                
+               
+                const riskData = data.ddos_risk || data.risk || {};
+                const riskLevelText = riskData.level || riskData.risk_level || 'Normal';
+                const riskMessage = riskData.message || riskData.description || 'Risk değerlendirmesi yapılamadı.';
+                
+                
+                let riskColor = '#5B6EFF'; // Mavi
+                let riskClass = 'normal';
+                
+                if (riskLevelText.toLowerCase() === 'yüksek') {
+                    riskColor = '#FF3B30'; // Kırmızı
+                    riskClass = 'high';
+                } else if (riskLevelText.toLowerCase() === 'orta') {
+                    riskColor = '#FF9500'; // Turuncu
+                    riskClass = 'medium';
+                } else if (riskLevelText.toLowerCase() === 'düşük') {
+                    riskColor = '#34C759'; // Yeşil
+                    riskClass = 'low';
+                }
+                
+               
+                const riskLevel = document.getElementById('risk-level');
+                riskLevel.textContent = riskLevelText;
+                riskLevel.style.color = riskColor;
+                riskLevel.className = 'value ' + riskClass;
+                
+                
+                const riskBox = document.querySelector('.ddos-risk');
+                if (riskBox) {
+                    riskBox.className = 'ddos-risk ' + riskClass;
+                }
+                
+               
+                document.getElementById('risk-message').textContent = riskMessage;
+            } catch (error) {
+                console.error(`DOM güncelleme hatası: ${error.message}`);
+            }
+        }
+        
+       
+        let isTrafficFetching = false;
+        
+       
+        async function fetchNetworkTraffic() {
+            
+            if (isTrafficFetching) return;
+            
+            isTrafficFetching = true;
+            
+            try {
+                const response = await fetch('/api/network_traffic');
+                if (!response.ok) {
+                    console.error(`Ağ trafiği API yanıt kodu: ${response.status}`);
+                    return;
+                }
+                
+                const data = await response.json();
+                if (data.error) {
+                    console.error(`Ağ trafiği hatası: ${data.error}`);
+                    return;
+                }
+                
+                
+                if (trafficMonitoringActive) {
+                    trafficStats.sampleCount++;
+                    trafficStats.incomingSum += data.incoming_packets;
+                    trafficStats.outgoingSum += data.outgoing_packets;
+                    trafficStats.maxIncoming = Math.max(trafficStats.maxIncoming, data.incoming_packets);
+                    trafficStats.maxOutgoing = Math.max(trafficStats.maxOutgoing, data.outgoing_packets);
+                }
+                
+               
+                checkMonitoringType(data);
+                
+               
+                updateTrafficData(data);
+                
+                
+                updateTrafficChart();
+            } catch (error) {
+                console.error(`Ağ trafiği izleme hatası: ${error.message}`);
+                if (trafficMonitoringActive) {
+                    
+                    toggleTrafficMonitoring();
+                }
+            } finally {
+               
+                isTrafficFetching = false;
+            }
+        }
+        
+        function checkMonitoringType(data) {
+            
+            const monitoringTypeEl = document.getElementById('monitoring-type');
+            
+            if (data.monitoring_type === 'local') {
+                monitoringTypeEl.textContent = 'Sadece yerel makine trafiği izleniyor';
+                monitoringTypeEl.style.color = '#FF9500'; // Turuncu
+            } else {
+                monitoringTypeEl.textContent = 'Tüm ağ trafiği izleniyor';
+                monitoringTypeEl.style.color = '#5B6EFF'; // Mavi
+            }
+        }
+        
+        function updateTrafficData(newData) {
+           
+            const maxDataPoints = 20;
+            
+            const date = new Date(newData.timestamp);
+            const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            trafficData.labels.push(timeString);
+            trafficData.outgoing.push(newData.outgoing_packets);
+            trafficData.incoming.push(newData.incoming_packets);
+          
+            if (trafficData.labels.length > maxDataPoints) {
+                trafficData.labels.shift();
+                trafficData.outgoing.shift();
+                trafficData.incoming.shift();
+            }
+        }
+        
+        function updateTrafficChart() {
+            const ctx = document.getElementById('traffic-chart').getContext('2d');
+            
+            if (trafficChart) {
+                trafficChart.data.labels = trafficData.labels;
+                trafficChart.data.datasets[0].data = trafficData.incoming;
+                trafficChart.data.datasets[1].data = trafficData.outgoing;
+                
+                
+                const highestValue = Math.max(
+                    ...trafficData.incoming.filter(val => val !== undefined), 
+                    ...trafficData.outgoing.filter(val => val !== undefined),
+                    1 
+                );
+                
+                
+                const newMax = Math.max(200, Math.ceil(highestValue * 1.3));
+                trafficChart.options.scales.y.max = newMax;
+                
+                trafficChart.update();
+                return;
+            }
+            
+            
+            if (trafficData.labels.length === 0) {
+                
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                trafficData.labels = [timeString];
+                trafficData.incoming = [0];
+                trafficData.outgoing = [0];
+            }
+            
+          
+            trafficChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trafficData.labels,
+                    datasets: [
+                        {
+                            label: 'Gelen Paket (paket/s)',
+                            data: trafficData.incoming,
+                            borderColor: '#34C759',
+                            backgroundColor: 'rgba(52, 199, 89, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#34C759',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Giden Paket (paket/s)',
+                            data: trafficData.outgoing,
+                            borderColor: '#5B6EFF',
+                            backgroundColor: 'rgba(91, 110, 255, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#5B6EFF',
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 200, 
+                            title: {
+                                display: true,
+                                text: 'paket/saniye',
+                                color: '#B0B8D1'
+                            },
+                            ticks: {
+                                color: '#B0B8D1',
+                                callback: function(value) {
+                                  
+                                    if (value >= 1000) {
+                                        return (value / 1000) + 'K';
+                                    }
+                                    return value;
+                                }
+                            },
+                            grace: '10%' 
+                        },
+                        x: {
+                            ticks: {
+                                color: '#B0B8D1',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#B0B8D1'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed.y.toFixed(2) + ' paket/s';
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 300 
+                    }
+                }
+            });
+        }
+
+        
+        function createResultsTable(data, type) {
+           
+            document.getElementById('results-table').style.display = 'none';
+        }
+        
+       
+        function loadScanHistoryFromStorage() {
+            try {
+                
+                scanHistory = []; 
+            } catch (error) {
+                console.error('Tarama geçmişi yüklenirken hata oluştu:', error);
+                scanHistory = [];
+            }
+        }
+        
+        
+        async function fetchScanHistory(scanType = 'all') {
+            try {
+                const response = await fetch(`/api/scan_history?type=${scanType}`);
+                if (!response.ok) {
+                    throw new Error(`API hatası: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.error) {
+                    console.error('Tarama geçmişi alınırken hata:', data.error);
+                    return [];
+                }
+                
+                
+                return data.history || [];
+            } catch (error) {
+                console.error('Tarama geçmişi alınırken hata:', error);
+                return [];
+            }
+        }
+        
+        
+        function addToScanHistory(type, results) {
+           
+            const newRecord = {
+                id: Date.now(), 
+                scan_type: type,
+                results: results,
+                created_at: new Date().toISOString()
+            };
+           
+            scanHistory.unshift(newRecord);
+           
+            const scanHistoryPage = document.getElementById('scan-history-page');
+            if (scanHistoryPage && scanHistoryPage.style.display !== 'none') {
+                loadScanHistory();
+            }
+        }
+        
+       
+        async function loadScanHistory() {
+            const historyList = document.getElementById('history-list');
+            const historyEmpty = document.getElementById('history-empty');
+            
+            if (!historyList || !historyEmpty) return;
+            
+            
+            historyList.innerHTML = '<div class="loading-message">Tarama geçmişi yükleniyor...</div>';
+            
+           
+            try {
+                scanHistory = await fetchScanHistory();
+                
+                
+                historyList.innerHTML = '';
+                
+                
+                if (!scanHistory || scanHistory.length === 0) {
+                    historyEmpty.style.display = 'flex';
+                    return;
+                }
+                
+              
+                historyEmpty.style.display = 'none';
+                
+               
+                scanHistory.forEach(record => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = `history-item ${record.scan_type}`;
+                    historyItem.dataset.id = record.id;
+                    
+                    
+                    const typeIcon = getTypeIcon(record.scan_type);
+                    const typeText = getTypeText(record.scan_type);
+                    const formattedDate = formatDate(record.created_at);
+                    
+                    
+                    historyItem.innerHTML = `
+                        <div class="history-header">
+                            <div class="history-type">
+                                <i class="${typeIcon}"></i>
+                                <span>${typeText}</span>
+                            </div>
+                        </div>
+                        <div class="history-content" style="display:flex;align-items:center;min-height:32px;">
+                            <div class="history-date" style="text-align:left;color:#B0B8D1;font-size:15px;margin:0;">${formattedDate}</div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="view-btn" onclick="viewScanRecord(${record.id})">
+                                <i class="fas fa-eye"></i> Görüntüle
+                            </button>
+                            <button class="delete-btn" onclick="deleteScanRecord(${record.id})">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                            <button class="pdf-btn" onclick="downloadPDF(${record.id}, this)">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    `;
+                    
+                    historyList.appendChild(historyItem);
+                });
+            } catch (error) {
+                console.error('Tarama geçmişi yüklenirken hata:', error);
+                historyList.innerHTML = '<div class="error-message">Tarama geçmişi yüklenemedi. Lütfen tekrar deneyin.</div>';
+            }
+        }
+        
+        
+        async function filterScanHistory(filterType) {
+            const historyList = document.getElementById('history-list');
+            const historyEmpty = document.getElementById('history-empty');
+            
+            if (!historyList || !historyEmpty) return;
+            
+            
+            historyList.innerHTML = '<div class="loading-message">Filtreleniyor...</div>';
+            
+            try {
+                
+                let filteredHistory = filterType === 'all' ? 
+                    await fetchScanHistory('all') : 
+                    await fetchScanHistory(filterType);
+                
+                
+                historyList.innerHTML = '';
+                
+                
+                if (!filteredHistory || filteredHistory.length === 0) {
+                    historyEmpty.style.display = 'flex';
+                    return;
+                }
+                
+                
+                historyEmpty.style.display = 'none';
+                
+               
+                filteredHistory.forEach(record => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = `history-item ${record.scan_type}`;
+                    historyItem.dataset.id = record.id;
+                    
+                    
+                    const typeIcon = getTypeIcon(record.scan_type);
+                    const typeText = getTypeText(record.scan_type);
+                    const formattedDate = formatDate(record.created_at);
+                    
+                    
+                    historyItem.innerHTML = `
+                        <div class="history-header">
+                            <div class="history-type">
+                                <i class="${typeIcon}"></i>
+                                <span>${typeText}</span>
+                            </div>
+                        </div>
+                        <div class="history-content" style="display:flex;align-items:center;min-height:32px;">
+                            <div class="history-date" style="text-align:left;color:#B0B8D1;font-size:15px;margin:0;">${formattedDate}</div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="view-btn" onclick="viewScanRecord(${record.id})">
+                                <i class="fas fa-eye"></i> Görüntüle
+                            </button>
+                            <button class="delete-btn" onclick="deleteScanRecord(${record.id})">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                            <button class="pdf-btn" onclick="downloadPDF(${record.id}, this)">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    `;
+                    
+                    historyList.appendChild(historyItem);
+                });
+            } catch (error) {
+                console.error('Tarama geçmişi filtrelenirken hata:', error);
+                historyList.innerHTML = '<div class="error-message">Filtreleme işlemi sırasında hata oluştu. Lütfen tekrar deneyin.</div>';
+            }
+        }
+        
+        
+        function getTypeIcon(type) {
+            switch(type) {
+                case 'ip': return 'fas fa-network-wired';
+                case 'mac': return 'fas fa-microchip';
+                case 'os': return 'fas fa-laptop';
+                case 'services': return 'fas fa-server';
+                default: return 'fas fa-search';
+            }
+        }
+        
+       
+        function getTypeText(type) {
+            switch(type) {
+                case 'ip': return 'IP Adresleri Taraması';
+                case 'mac': return 'MAC Adresleri Taraması';
+                case 'os': return 'İşletim Sistemi Taraması';
+                case 'services': return 'Port ve Servis Taraması';
+                default: return 'Bilinmeyen Tarama';
+            }
+        }
+        
+        
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('tr-TR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+       
+        function generateSummary(record) {
+            const scanType = record.scan_type || record.type;
+            const results = record.results || record.scan_data;
+            
+            if (!results) {
+                return 'Tarama detayları bulunamadı.';
+            }
+            
+            switch(scanType) {
+                case 'ip':
+                    const ipCount = results.ip_addresses ? results.ip_addresses.length : 0;
+                    return `Toplam ${ipCount} IP adresi tespit edildi.`;
+                    
+                case 'mac':
+                    const macCount = results.mac_addresses ? results.mac_addresses.length : 0;
+                    return `Toplam ${macCount} MAC adresi tespit edildi.`;
+                    
+                case 'os':
+                    const osCount = results.os_details ? Object.keys(results.os_details).length : 0;
+                    return `Toplam ${osCount} cihazın işletim sistemi tespit edildi.`;
+                    
+                case 'services':
+                    let activeDevices = 0;
+                    let totalPorts = 0;
+                    let riskCount = 0;
+                    
+                    if (results.services) {
+                        activeDevices = Object.keys(results.services).length;
+                        
+                        Object.values(results.services).forEach(ports => {
+                            if (ports && !ports.error) {
+                                totalPorts += Object.keys(ports).length;
+                            }
+                        });
+                        
+                        if (results.risks) {
+                            Object.values(results.risks).forEach(risks => {
+                                riskCount += Object.keys(risks).length;
+                            });
+                        }
+                    }
+                    
+                    return `${activeDevices} cihaz üzerinde toplam ${totalPorts} açık port tespit edildi. ${riskCount} potansiyel güvenlik riski bulundu.`;
+                    
+                default:
+                    return 'Tarama detayları bulunamadı.';
+            }
+        }
+        
+      
+        async function viewScanRecord(id) {
+            try {
+               
+                document.querySelectorAll('.history-details-panel').forEach(panel => panel.remove());
+
+                
+                const allRecords = await fetchScanHistory('all');
+                const record = allRecords.find(item => item.id === id);
+                if (!record) {
+                    alert('Tarama kaydı bulunamadı.');
+                    return;
+                }
+
+               
+                const detailsPanel = document.createElement('div');
+                detailsPanel.className = 'history-details-panel';
+                detailsPanel.style.background = '#23243a';
+                detailsPanel.style.borderRadius = '8px';
+                detailsPanel.style.margin = '10px 0 20px 0';
+                detailsPanel.style.padding = '20px';
+                detailsPanel.style.boxShadow = '0 2px 12px rgba(91,110,255,0.08)';
+                detailsPanel.style.position = 'relative';
+                detailsPanel.innerHTML = `<button class="close-details-btn" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#B0B8D1;font-size:20px;cursor:pointer;" title="Kapat">&times;</button><div id="details-content-${id}"></div>`;
+
+                
+                detailsPanel.querySelector('.close-details-btn').onclick = function() {
+                    detailsPanel.remove();
+                };
+
+                
+                const historyItem = document.querySelector(`.history-item[data-id='${id}']`);
+                if (historyItem) {
+                    historyItem.insertAdjacentElement('afterend', detailsPanel);
+                }
+
+            
+                const detailsContent = detailsPanel.querySelector(`#details-content-${id}`);
+                if (detailsContent) {
+                    detailsContent.innerHTML = '';
+                    
+                    if (record.scan_type === 'services' && record.results && record.results.services) {
+                        
+                        updateResults(record.results, 'services');
+                      
+                        const resultSection = document.getElementById('result-text');
+                        if (resultSection && resultSection.firstChild) {
+                            detailsContent.appendChild(resultSection.firstChild.cloneNode(true));
+                            resultSection.innerHTML = '';
+                        }
+                    } else if (record.scan_type === 'os' && record.results && record.results.os_details) {
+                        
+                        const oldChart = document.getElementById('os-chart-history');
+                        if (oldChart) oldChart.remove();
+                       
+                        const chartContainer = document.createElement('div');
+                        chartContainer.id = 'os-chart-container-history';
+                        chartContainer.style.display = 'flex';
+                        chartContainer.style.flexDirection = 'column';
+                        chartContainer.style.alignItems = 'center';
+                        chartContainer.style.justifyContent = 'center';
+                        chartContainer.style.height = '350px';
+                        chartContainer.style.marginBottom = '20px';
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.id = 'os-chart-history';
+                        chartContainer.appendChild(canvas);
+                        detailsContent.appendChild(chartContainer);
+                       
+                        setTimeout(() => {
+                            createOSChart(record.results.os_details, 'os-chart-container-history', 'os-chart-history');
+                        }, 100);
+                       
+                        updateResults(record.results, 'os');
+                        const resultSection = document.getElementById('result-text');
+                        if (resultSection && resultSection.firstChild) {
+                            detailsContent.appendChild(resultSection.firstChild.cloneNode(true));
+                            resultSection.innerHTML = '';
+                        }
+                    } else {
+                        
+                        updateResults(record.results, record.scan_type);
+                        const resultSection = document.getElementById('result-text');
+                        if (resultSection && resultSection.firstChild) {
+                            detailsContent.appendChild(resultSection.firstChild.cloneNode(true));
+                            resultSection.innerHTML = '';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Tarama kaydı görüntülenirken hata:', error);
+                alert('Tarama kaydı görüntülenirken bir hata oluştu.');
+            }
+        }
+
+       
+        function updateResultsToElement(data, type, targetElement) {
+            
+            targetElement.innerHTML = '';
+            const resultList = document.createElement('ul');
+            resultList.className = 'results-list';
+            resultList.style.listStyle = 'none';
+            resultList.style.padding = '0';
+            resultList.style.margin = '10px 0';
+            if (type === 'ip') {
+                if (data.ip_addresses && data.ip_addresses.length > 0) {
+                    data.ip_addresses.forEach(ip => {
+                        const item = document.createElement('li');
+                        item.innerHTML = `<i class="fas fa-network-wired"></i> ${ip}`;
+                        item.style.padding = '12px';
+                        item.style.marginBottom = '8px';
+                        item.style.borderRadius = '8px';
+                        item.style.backgroundColor = 'rgba(91, 110, 255, 0.1)';
+                        item.style.borderLeft = '4px solid #5B6EFF';
+                        resultList.appendChild(item);
+                    });
+                } else {
+                    const item = document.createElement('li');
+                    item.innerHTML = '<i class="fas fa-exclamation-circle"></i> IP Adresi Yok';
+                    item.style.padding = '12px';
+                    item.style.borderRadius = '8px';
+                    item.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                    resultList.appendChild(item);
+                }
+            } else if (type === 'mac') {
+                if (data.mac_addresses && data.mac_addresses.length > 0) {
+                    data.mac_addresses.forEach(itemData => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<i class="fas fa-microchip"></i> ${itemData}`;
+                        li.style.padding = '12px';
+                        li.style.marginBottom = '8px';
+                        li.style.borderRadius = '8px';
+                        li.style.backgroundColor = 'rgba(167, 139, 250, 0.1)';
+                        li.style.borderLeft = '4px solid #A78BFA';
+                        resultList.appendChild(li);
+                    });
+                } else {
+                    const item = document.createElement('li');
+                    item.innerHTML = '<i class="fas fa-exclamation-circle"></i> MAC Adresi Yok';
+                    item.style.padding = '12px';
+                    item.style.borderRadius = '8px';
+                    item.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                    resultList.appendChild(item);
+                }
+            } else if (type === 'os') {
+                if (data.os_details && Object.keys(data.os_details).length > 0) {
+                    Object.entries(data.os_details).forEach(([host, os]) => {
+                        const simplifiedOS = simplifyOSName(os);
+                        let iconClass = simplifiedOS.includes('Windows') ? 'fab fa-windows' :
+                                      simplifiedOS.includes('Linux') ? 'fab fa-linux' :
+                                      simplifiedOS.includes('Apple') ? 'fab fa-apple' :
+                                      simplifiedOS.includes('Android') ? 'fab fa-android' :
+                                      simplifiedOS.includes('Router') ? 'fas fa-wifi' : 'fas fa-server';
+                        let color = simplifiedOS.includes('Windows') ? '#5B6EFF' :
+                                  simplifiedOS.includes('Linux') ? '#34C759' :
+                                  simplifiedOS.includes('Apple') ? '#FF2D55' :
+                                  simplifiedOS.includes('Android') ? '#FF9500' :
+                                  simplifiedOS.includes('Router') ? '#FF6B6B' : '#A78BFA';
+                        const item = document.createElement('li');
+                        item.innerHTML = `<i class="${iconClass}" style="color: ${color}; width: 20px; text-align: center; margin-right: 10px;"></i> <strong>${host}:</strong> <span style="color: ${color}">${simplifiedOS}</span>`;
+                        item.style.padding = '12px';
+                        item.style.marginBottom = '8px';
+                        item.style.borderRadius = '8px';
+                        item.style.backgroundColor = `rgba(${hexToRgb(color)}, 0.1)`;
+                        item.style.borderLeft = `4px solid ${color}`;
+                        resultList.appendChild(item);
+                    });
+                } else {
+                    const item = document.createElement('li');
+                    item.innerHTML = '<i class="fas fa-exclamation-circle"></i> İşletim Sistemi Bilgisi Yok';
+                    item.style.padding = '12px';
+                    item.style.borderRadius = '8px';
+                    item.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                    resultList.appendChild(item);
+                }
+            } else if (type === 'services') {
+                if (data.services && Object.keys(data.services).length > 0) {
+                    Object.entries(data.services).forEach(([host, ports]) => {
+                        const hostItem = document.createElement('li');
+                        const isLocalDevice = host.includes("(Bu cihaz)");
+                        const displayHost = isLocalDevice ? 
+                            host.replace(" (Bu cihaz)", "") + " <small style='color:#34C759'>(Bu cihaz)</small>" : 
+                            host;
+                        let hostIcon = '<i class="fas fa-server"></i>';
+                        if (ports.error) {
+                            hostItem.innerHTML = `${hostIcon} <strong>${displayHost}</strong> <span class="device-status error">Yanıt Yok</span>`;
+                            hostItem.style.padding = '12px';
+                            hostItem.style.marginBottom = '8px';
+                            hostItem.style.borderRadius = '8px';
+                            hostItem.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                            hostItem.style.borderLeft = '4px solid #FF6B6B';
+                            resultList.appendChild(hostItem);
+                        } else {
+                            let portCount = Object.keys(ports).length;
+                            hostItem.innerHTML = `${hostIcon} <strong>${displayHost}</strong> <span class="port-count">${portCount} port</span>`;
+                            hostItem.style.padding = '12px';
+                            hostItem.style.marginBottom = '8px';
+                            hostItem.style.borderRadius = '8px';
+                            hostItem.style.backgroundColor = 'rgba(91, 110, 255, 0.1)';
+                            hostItem.style.borderLeft = '4px solid #5B6EFF';
+                            resultList.appendChild(hostItem);
+                        }
+                    });
+                } else {
+                    const item = document.createElement('li');
+                    item.innerHTML = '<i class="fas fa-exclamation-circle"></i> Açık Servis/Port Yok';
+                    item.style.padding = '12px';
+                    item.style.borderRadius = '8px';
+                    item.style.backgroundColor = 'rgba(255, 107, 107, 0.1)';
+                    resultList.appendChild(item);
+                }
+            }
+            targetElement.appendChild(resultList);
+        }
+        
+       
+        async function deleteScanRecord(id) {
+            
+            const existingModal = document.getElementById('delete-confirm-modal');
+            if (existingModal) existingModal.remove();
+
+            
+            const modal = document.createElement('div');
+            modal.id = 'delete-confirm-modal';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.background = 'rgba(0,0,0,0.35)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = '9999';
+            modal.innerHTML = `
+                <div style="background:#23243a;padding:32px 28px 24px 28px;border-radius:12px;box-shadow:0 4px 32px rgba(91,110,255,0.15);min-width:320px;max-width:90vw;text-align:center;position:relative;">
+                    <button id="close-modal-btn" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#B0B8D1;font-size:20px;cursor:pointer;" title="Kapat">&times;</button>
+                    <div style="font-size:22px;color:#FF6B6B;margin-bottom:12px;"><i class="fas fa-trash"></i></div>
+                    <div style="font-size:16px;color:#B0B8D1;margin-bottom:18px;">Bu tarama kaydını silmek istediğinize emin misiniz?</div>
+                    <div style="display:flex;gap:16px;justify-content:center;">
+                        <button id="confirm-delete-btn" style="background:#FF6B6B;color:#fff;padding:8px 22px;border:none;border-radius:6px;font-weight:600;cursor:pointer;">Evet, sil</button>
+                        <button id="cancel-delete-btn" style="background:#242e48;color:#B0B8D1;padding:8px 22px;border:none;border-radius:6px;font-weight:600;cursor:pointer;">Vazgeç</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+         
+            modal.querySelector('#close-modal-btn').onclick = () => modal.remove();
+            modal.querySelector('#cancel-delete-btn').onclick = () => modal.remove();
+
+         
+            modal.querySelector('#confirm-delete-btn').onclick = async function() {
+                try {
+                    const response = await fetch(`/api/scan_history/delete/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Silme işlemi başarısız oldu');
+                    }
+                    modal.remove();
+                    await loadScanHistory();
+                } catch (error) {
+                    modal.remove();
+                    alert('Tarama kaydı silinirken bir hata oluştu: ' + error.message);
+                }
+            };
+        }
+        
+       
+        async function clearScanHistory() {
+        
+            const existingModal = document.getElementById('delete-confirm-modal');
+            if (existingModal) existingModal.remove();
+
+           
+            const modal = document.createElement('div');
+            modal.id = 'delete-confirm-modal';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.background = 'rgba(0,0,0,0.35)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = '9999';
+            modal.innerHTML = `
+                <div style="background:#23243a;padding:32px 28px 24px 28px;border-radius:12px;box-shadow:0 4px 32px rgba(91,110,255,0.15);min-width:320px;max-width:90vw;text-align:center;position:relative;">
+                    <button id="close-modal-btn" style="position:absolute;top:10px;right:10px;background:none;border:none;color:#B0B8D1;font-size:20px;cursor:pointer;" title="Kapat">&times;</button>
+                    <div style="font-size:22px;color:#FF6B6B;margin-bottom:12px;"><i class="fas fa-trash"></i></div>
+                    <div style="font-size:16px;color:#B0B8D1;margin-bottom:18px;">Tüm tarama geçmişinizi silmek istediğinize emin misiniz?</div>
+                    <div style="display:flex;gap:16px;justify-content:center;">
+                        <button id="confirm-delete-btn" style="background:#FF6B6B;color:#fff;padding:8px 22px;border:none;border-radius:6px;font-weight:600;cursor:pointer;">Evet, tümünü sil</button>
+                        <button id="cancel-delete-btn" style="background:#242e48;color:#B0B8D1;padding:8px 22px;border:none;border-radius:6px;font-weight:600;cursor:pointer;">Vazgeç</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+           
+            modal.querySelector('#close-modal-btn').onclick = () => modal.remove();
+            modal.querySelector('#cancel-delete-btn').onclick = () => modal.remove();
+
+            
+            modal.querySelector('#confirm-delete-btn').onclick = async function() {
+                try {
+                    const response = await fetch('/api/scan_history/clear', {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Temizleme işlemi başarısız oldu');
+                    }
+                    modal.remove();
+                    await loadScanHistory();
+                } catch (error) {
+                    modal.remove();
+                    alert('Tarama geçmişi temizlenirken bir hata oluştu: ' + error.message);
+                }
+            };
+        }
+        
+       
+        function hexToRgb(hex) {
+            
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? 
+                `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                '91, 110, 255'; // Varsayılan renk
+        }
+        
+        
+        const portExplanations = {
+           
+            "135": "Windows bilgisayarlar arasında uzaktan erişim için kullanılır. Bilgisayarınızın diğer Windows cihazlarla iletişim kurmasını sağlar.",
+            "139": "Eski Windows ağlarında dosya ve yazıcı paylaşımı için kullanılır. Bilgisayarlar arası kaynak paylaşımını sağlar.",
+            "445": "Modern Windows sistemlerinde dosya ve yazıcı paylaşımı için kullanılır. Ağdaki diğer bilgisayarlarla dosya alışverişi yapmak için gereklidir.",
+            "137": "NetBIOS İsim Servisi. Windows ağında bilgisayar isimlerini bulmak için kullanılır.",
+            "138": "NetBIOS Datagram Servisi. Windows ağında mesaj paylaşımı için kullanılır.",
+            "80": "Web sitelerini görüntülemek için kullanılan HTTP portu. İnternet sitelerine bağlanmanızı sağlar.",
+            "443": "Güvenli web sitelerini görüntülemek için kullanılan HTTPS portu. Şifreli bağlantı sağlar.",
+            "21": "Dosya transferi (FTP) için kullanılır. Uzak sunuculara dosya yüklemenizi sağlar.",
+            "22": "Güvenli uzaktan erişim (SSH) için kullanılır. Sistem yöneticilerinin uzaktan güvenli erişimini sağlar.",
+            "25": "E-posta göndermek için kullanılan SMTP portu. E-postaların iletilmesini sağlar.",
+            "53": "İnternet adreslerini IP adreslerine çeviren DNS portu. Web sitesi isimlerini bulmanızı sağlar.",
+            "3389": "Uzak masaüstü bağlantısı için kullanılır. Başka bilgisayarları uzaktan kontrol etmenizi sağlar.",
+            "8080": "Alternatif web sunucusu portu. Genellikle test amaçlı veya proxy sunucular için kullanılır.",
+            "8443": "Alternatif güvenli web sunucusu portu. Şifreli bağlantı sağlar.",
+            "20": "FTP veri transferi için kullanılır. Dosya indirme/yükleme işlemlerini yapar.",
+            "23": "Telnet portu. Uzak cihazlara bağlanmak için kullanılır (şifreleme olmadan).",
+            "110": "E-posta almak için kullanılan POP3 portu. Posta kutunuzdan e-postaları indirmenizi sağlar.",
+            "143": "E-posta almak için kullanılan IMAP portu. E-postaları sunucuda yönetmenizi sağlar.",
+            "587": "Alternatif e-posta gönderme portu (SMTP). Genellikle kullanıcı kimlik doğrulaması ile e-posta göndermek için kullanılır.",
+            "993": "Güvenli IMAP portu. E-postalarınızı şifreli bağlantı üzerinden almanızı sağlar.",
+            "995": "Güvenli POP3 portu. E-postalarınızı şifreli bağlantı üzerinden almanızı sağlar.",
+            "67": "DHCP sunucu portu. Cihazlara otomatik IP adresi dağıtır.",
+            "68": "DHCP istemci portu. Ağa bağlanan cihazın IP adresi almasını sağlar.",
+            "69": "TFTP portu. Basit dosya transferi için kullanılır. Ağ cihazlarının firmware güncellemesi yapmak veya yapılandırma dosyalarını yüklemek için sıklıkla kullanılır.",
+            "123": "Zaman senkronizasyonu için kullanılır (NTP). Bilgisayarınızın saatini doğru ayarlar.",
+            "5004": "VoIP (internet üzerinden ses iletimi) için kullanılır. İnternet üzerinden telefon görüşmesi yapmanızı sağlar.",
+            "5005": "RTP (gerçek zamanlı iletişim) için kullanılır. Sesli ve görüntülü iletişimi destekler.",
+            "1883": "MQTT protokolü için kullanılır. Akıllı ev cihazlarının iletişimini sağlar.",
+            "8883": "Güvenli MQTT protokolü için kullanılır. Akıllı ev cihazlarının güvenli iletişimini sağlar.",
+            "161": "SNMP portu. Ağ cihazlarının izlenmesi ve yönetilmesi için kullanılır.",
+            "162": "SNMP bildirimleri (trap) için kullanılır. Ağ cihazlarından uyarı mesajları alınmasını sağlar.",
+            "500": "IPsec VPN bağlantısı için kullanılır. Güvenli sanal özel ağ oluşturur.",
+            "5060": "SIP (Session Initiation Protocol) portu. İnternet telefonu hizmetleri için kullanılır.",
+            "5061": "Güvenli SIP portu. Şifreli internet telefon görüşmeleri sağlar.",
+            "514": "Syslog portu. Ağdaki cihazların sistem günlüklerini merkezi bir sunucuya göndermelerini sağlar. Sistem yöneticilerinin farklı cihazların günlüklerini tek bir yerden takip etmesine olanak tanır.",
+            "1900": "UPnP portu. Cihazların otomatik olarak birbirini keşfetmesini ve ağda kolayca iletişim kurmasını sağlar. Oyun konsolları, medya oynatıcıları ve yönlendiriciler arasında otomatik bağlantı kurmak için kullanılır.",
+            "5353": "Zeroconf/mDNS portu. Ağda yapılandırma gerektirmeden cihazların birbirini otomatik bulmasını sağlar. Apple AirPlay, Chromecast gibi hizmetlerin cihazları keşfetmesi için kullanılır."
+        };
+        
+        
+        const securityRiskExplanations = {
+           
+            "135": "Bu port açık bırakıldığında, kötü niyetli kişiler uzaktan Windows servislerine erişebilir. Bilgisayarınıza yetkisiz erişim riski oluşturur.",
+            "139": "Bu port kötü niyetli kişilerin dosya paylaşımınıza erişmesine olanak sağlayabilir. Şifresiz paylaşımlarınız varsa verileriniz tehlikede olabilir.",
+            "445": "SMB protokolü üzerinden saldırılar (WannaCry gibi) için sıkça hedef alınan bir porttur. Dosya sisteminize yetkisiz erişim riski yaratabilir.",
+            "137": "Bu port, NetBIOS isim hizmeti saldırılarına açık olabilir. Kötü niyetli kişiler bilgisayar adınızı ve ağ yapınızı öğrenebilir.",
+            "138": "NetBIOS üzerinden yetkisiz dosya paylaşımına erişim riski oluşturabilir. Ağınızda istenmeyen erişimler mümkün olabilir.",
+            "88": "Kerberos protokolü zayıf yapılandırıldığında, kimlik doğrulama atlatma saldırılarına açık olabilir (Pass-the-Ticket).",
+            "1434": "SQL Server Browser açıkları üzerinden veritabanlarınıza yetkisiz erişim sağlanabilir veya DoS saldırılarına maruz kalabilirsiniz.",
+            "5985": "WinRM hizmeti yanlış yapılandırıldığında, saldırganlar PowerShell komutlarını uzaktan çalıştırabilir.",
+            "49152": "Dinamik portların yanlış yapılandırılması, çeşitli servislere yetkisiz erişime neden olabilir.",
+            "49153": "Dinamik portların yanlış yapılandırılması, çeşitli servislere yetkisiz erişime neden olabilir.",
+            "49154": "Dinamik portların yanlış yapılandırılması, çeşitli servislere yetkisiz erişime neden olabilir.",
+            "49155": "Dinamik portların yanlış yapılandırılması, çeşitli servislere yetkisiz erişime neden olabilir.",
+            
+           
+            "80": "Güvenliği düşük web sunucuları bu port üzerinden saldırılara açık olabilir. Şifreleme olmadığı için giriş bilgileriniz çalınabilir.",
+            "443": "Güncel olmayan SSL/TLS sürümleri kullanılıyorsa güvenlik açıkları barındırabilir.",
+            "8080": "Yanlış yapılandırılmış proxy sunucuları üzerinden sistemlere sızma riski oluşturabilir.",
+            "81": "Alternatif HTTP portları genellikle yönetim arayüzleri için kullanılır ve varsayılan güvenlik ayarları yetersiz olabilir.",
+            "8000": "Geliştirme web sunucuları güvenlik önlemleri olmadan çalıştırılabilir, bu da saldırı riskini artırır.",
+            "8008": "Varsayılan kimlik bilgileri değiştirilmezse yetkisiz erişim riski oluşabilir.",
+            "8081": "Yönetim arayüzleri için kullanılan bu port, zayıf parolalar kullanılırsa kolayca ele geçirilebilir.",
+            "8888": "Geliştirme ve test amaçlı açılan portlar genellikle güvenlik önlemleri olmadan çalışır.",
+            "9000": "Web uygulamaları için kullanılan bu portlar, SQL injection ve XSS gibi saldırılara açık olabilir.",
+            "9090": "Yönetim panelleri için kullanılan bu port, brute-force saldırılarına karşı savunmasız olabilir.",
+            "10000": "Webmin gibi yönetim arayüzlerinde güvenlik açıkları olabilir, bu da sunucunuza tam erişim sağlayabilir.",
+            
+           
+            "21": "FTP protokolü şifreleme kullanmaz, bu nedenle kullanıcı adı ve parolalar düz metin olarak gönderilebilir.",
+            "22": "Zayıf şifreler veya güvenliği düşük SSH yapılandırması kullanılıyorsa brute-force saldırılarına açık olabilir.",
+            "23": "Telnet şifreleme kullanmaz. Tüm veriler açık metin olarak aktarılır, bu da kimlik bilgilerinizin çalınma riskini yaratır.",
+            "69": "TFTP hiçbir kimlik doğrulama mekanizması kullanmaz. Herkes dosyalarınıza erişebilir ve değiştirebilir.",
+            "111": "RPC hizmeti, uzak bilgisayarlara komut çalıştırma yetkisi verebilir ve güvenlik açıkları barındırabilir.",
+            "515": "LPR/LPD protokolü, kimlik doğrulama olmadan yazıcılara erişim sağlar ve yazıcı kuyruklarına müdahale edilmesine olanak tanır.",
+            "548": "AFP protokolü eski sürümlerinde güvenlik açıkları bulunabilir ve dosya sisteminize yetkisiz erişim riski oluşturabilir.",
+            "2049": "NFS servisinin yanlış yapılandırılması, uzaktan dosya sistemine yetkisiz erişim sağlanmasına neden olabilir.",
+            "631": "IPP hizmeti, yazıcı ayarlarına yetkisiz erişim ve yazdırma işlemlerinin manipüle edilmesi riskini taşır.",
+            
+           
+            "25": "SMTP kimlik doğrulama olmadan yapılandırılırsa, sunucunuz spam göndermek için kullanılabilir.",
+            "110": "POP3 protokolü düz metin kimlik doğrulama kullanabilir, bu da kullanıcı bilgilerinin çalınma riskini oluşturur.",
+            "143": "IMAP protokolü güvenli olmayan bir şekilde yapılandırılırsa, e-postalarınız izlenebilir veya çalınabilir.",
+            "465": "Eski SSL uygulamaları güvenlik açıklarına sahip olabilir, güncel TLS yapılandırması önemlidir.",
+           
+            "1433": "SQL Server güvenliği düşük yapılandırıldığında, SQL injection saldırıları veya yetkisiz erişim riski oluşabilir.",
+            "3306": "MySQL veritabanlarına güçlü kimlik doğrulama olmadan erişim sağlanabilir.",
+            "5432": "PostgreSQL veritabanlarına yetkisiz erişim sağlanabilir.",
+            "6379": "Redis varsayılan olarak kimlik doğrulama kullanmaz, internet erişimine açık olduğunda tüm verilerinize erişilebilir.",
+            
+           
+            "3389": "RDP (Uzak Masaüstü) brute-force saldırılarının sık hedefidir. Zayıf şifreler kullanılıyorsa sisteminiz tehlikede olabilir.",
+            "5900": "VNC genellikle zayıf şifreleme kullanır ve brute-force saldırılarına açıktır.",
+            "5800": "VNC Web arayüzü, şifreleme olmadan çalışabilir ve ağ dinlemesine maruz kalabilir.",
+            "1723": "PPTP VPN protokolü, zayıf şifreleme kullanan eski bir protokoldür ve modern saldırılara karşı savunmasızdır.",
+            "1720": "H.323 protokolü, güvenlik önlemleri olmadan yapılandırıldığında saldırılara açık olabilir.",
+            "7070": "Medya aktarım servisleri, içerik dinlemesi ve manipülasyonu riskini taşıyabilir.",
+            
+          
+            "161": "SNMP eski sürümleri (v1/v2) şifreleme kullanmaz. Ağ yapılandırmanız ve cihaz bilgileriniz ele geçirilebilir.",
+            "500": "IPsec VPN yapılandırma hataları, ağınıza yetkisiz erişim sağlanmasına neden olabilir.",
+            "514": "Syslog şifreleme kullanmadan iletilir. Hassas sistem bilgileri izlenebilir veya değiştirilebilir.",
+            "3128": "Yanlış yapılandırılmış proxy sunucuları, ağınıza sızılması veya içeriğin değiştirilmesi için kullanılabilir.",
+            "9100": "RAW yazdırma portu, yazıcıya doğrudan belge gönderme imkanı verir ve yazıcı istismarı riskini taşır.",
+            
+            
+            "389": "LDAP protokolü şifreleme olmadan kullanıldığında, kullanıcı kimlik bilgileri ve dizin bilgileri açığa çıkabilir.",
+            "636": "Güncel olmayan SSL/TLS sürümleriyle çalışan LDAPS, şifreleme güvenlik açıklarına maruz kalabilir.",
+            
+            "5222": "XMPP protokolü, şifreleme olmadan yapılandırıldığında mesajların dinlenmesi riskini taşır.",
+            
+           
+            "1900": "UPnP protokolünde birçok güvenlik açığı bulunmuştur. Kötü niyetli kişiler bunu kullanarak yönlendiricinize erişebilir.",
+            "5353": "Zeroconf/mDNS hizmetleri bilgi sızıntısına sebep olabilir. Ağınızdaki cihazlar ve servisler hakkında bilgi toplanabilir.",
+            
+            
+            "default": "Bu açık port, doğru yapılandırılmamışsa veya güncel olmayan yazılım kullanıyorsa güvenlik riski oluşturabilir. İhtiyaç duymadığınız açık portları kapatmanız önerilir."
+        };
+
+        // PDF indirme fonksiyonu
+        function downloadPDF(scanId, btn) {
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PDF';
+            }
+            fetch(`/api/export_pdf/${scanId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('PDF oluşturulamadı');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `tarama_${scanId}_netpulse.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                })
+                .catch(err => {
+                    alert('PDF indirme sırasında hata: ' + err.message);
+                })
+                .finally(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-file-pdf"></i> PDF';
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

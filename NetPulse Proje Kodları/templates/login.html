@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetPulse - Giriş Yap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            color: #B0B8D1;
+            position: relative;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+        }
+        
+    
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: twinkle 8s infinite ease-in-out;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+            100% { opacity: 0.3; }
+        }
+        
+        
+        .medium-star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: twinkle-medium 12s infinite ease-in-out;
+        }
+        
+        @keyframes twinkle-medium {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+        }
+        
+        
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.2;
+            animation: pulse 25s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(1.15); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.2; }
+        }
+        
+    
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .login-form {
+            background-color: rgba(26, 35, 56, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            width: 350px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(90deg, #5B6EFF 0%, #A78BFA 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .slogan {
+            text-align: center;
+            color: #B0B8D1;
+            font-size: 1em;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #A1ABD0;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #2d3748;
+            background-color: #121B2F;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #5B6EFF;
+            box-shadow: 0 0 0 3px rgba(91, 110, 255, 0.25);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(90deg, #5B6EFF 0%, #A78BFA 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(91, 110, 255, 0.25);
+        }
+        
+        .error-message {
+            color: #FF6B6B;
+            font-size: 14px;
+            margin-top: 5px;
+            background-color: rgba(255, 107, 107, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #FF6B6B;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .register-link a {
+            color: #5B6EFF;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .register-link a:hover {
+            color: #A78BFA;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+ 
+    <div class="space-background" id="space-background"></div>
+    
+    <div class="container">
+        <div class="login-form">
+            <h1>NetPulse</h1>
+            
+            <p class="slogan">Ağınızın Nabzını Dinleyin</p>
+            
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <label for="username">Kullanıcı Adı</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Şifre</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn">Giriş Yap</button>
+            </form>
+            
+            <div class="register-link">
+                Hesabınız yok mu? <a href="{{ url_for('register') }}">Kayıt Ol</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const spaceBackground = document.getElementById('space-background');
+            
+            for (let i = 0; i < 200; i++) {
+                createStar(spaceBackground);
+            }
+            
+            
+            for (let i = 0; i < 5; i++) {
+                createNebula(spaceBackground);
+            }
+        });
+        
+        function createStar(container) {
+           
+            const starType = Math.random() > 0.7 ? 'medium-star' : 'star';
+            
+            const star = document.createElement('div');
+            star.className = starType;
+            
+           
+            const size = Math.random() * 1.5 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            
+         
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            
+            star.style.animationDelay = `${Math.random() * 15}s`;
+            
+          
+            if (size > 2) {
+                star.style.boxShadow = '0 0 5px 1px rgba(255, 255, 255, 0.7)';
+            } else if (size > 1.5) {
+                star.style.boxShadow = '0 0 3px 1px rgba(255, 255, 255, 0.5)';
+            }
+            
+            container.appendChild(star);
+        }
+        
+        function createNebula(container) {
+            const nebula = document.createElement('div');
+            nebula.className = 'nebula';
+            
+        
+            const size = Math.random() * 500 + 300;
+            nebula.style.width = `${size}px`;
+            nebula.style.height = `${size}px`;
+            
+            
+            nebula.style.top = `${Math.random() * 100}%`;
+            nebula.style.left = `${Math.random() * 100}%`;
+            
+            
+            const colors = [
+                'rgba(75, 100, 255, 0.22)',
+                'rgba(255, 100, 100, 0.22)',
+                'rgba(100, 255, 255, 0.22)',
+                'rgba(180, 100, 255, 0.22)',
+                'rgba(255, 180, 100, 0.22)'
+            ];
+            nebula.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+         
+            nebula.style.animationDelay = `${Math.random() * 10}s`;
+            
+            container.appendChild(nebula);
+        }
+    </script>
+</body>
+</html>
